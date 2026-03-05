@@ -1,0 +1,14 @@
+﻿namespace the_alkanz.Website.Models;
+
+public class Product
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public Guid  CategoryId { get; set; }
+    public int  Price { get; set; }
+    public int StockCount { get; set; }
+    public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.UtcNow;
+
+}
