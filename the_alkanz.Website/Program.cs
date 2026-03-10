@@ -1,11 +1,15 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using the_alkanz.Website.Data;
+using the_alkanz.Website.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen(
      option =>
@@ -22,6 +26,18 @@ builder.Services.AddSwaggerGen(
          );
      }
     );
+
+var connectionString = builder.
+                       Configuration
+                       .GetConnectionString("KanzConnectionString");
+
+builder.Services.AddDbContext<KanzDbContext>(
+    option => option.UseSqlServer(connectionString)
+    );
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+                            .AddEntityFrameworkStores<KanzDbContext>();
+
 
 var app = builder.Build();
 
