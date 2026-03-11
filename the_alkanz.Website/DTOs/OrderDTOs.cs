@@ -1,6 +1,6 @@
 ﻿namespace the_alkanz.Website.DTOs;
 
-public class OrderItemDto
+public class OrderItemResponseDto
 {
     public Guid ProductId { get; set; }
     public decimal Price { get; set; }
@@ -13,5 +13,5 @@ public class OrderResponseDto
     public DateTime OrderDate { get; set; }
     public string Status { get; set; } = string.Empty;
 
-    public IEnumerable<OrderItemDto> Items { get; set; } = new List<OrderItemDto>();
+    public IEnumerable<OrderItemResponseDto> Items { get; set; } = new List<OrderItemResponseDto>();
 }
