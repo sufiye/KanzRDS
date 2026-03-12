@@ -1,31 +1,73 @@
-﻿using the_alkanz.Website.DTOs;
+﻿using AutoMapper;
+using the_alkanz.Website.DTOs;
+using the_alkanz.Website.Models;
+using the_alkanz.Website.Repositories;
 
 namespace the_alkanz.Website.Services;
 
 public class ProductService : IProductService
 {
-    public Task<ProductResponseDto> CreatAsync(CreateProductRequestDto createProductRequest)
+    private readonly IMapper _mapper;
+    private readonly IProductRepository _repository;
+
+    public ProductService(IMapper mapper, IProductRepository repository)
     {
-        throw new NotImplementedException();
+        _mapper = mapper;
+        _repository = repository;
     }
 
-    public Task<bool> DeleteAsync(Guid id)
+    public async Task<ProductResponseDto> CreatAsync(CreateProductRequestDto createProductRequest)
     {
-        throw new NotImplementedException();
+        var product = _mapper.Map<Product>(createProductRequest);
+
+        product = await _repository.AddAsync(product);
+
+        return _mapper.Map<ProductResponseDto>(product);
     }
 
-    public Task<IEnumerable<ProductResponseDto>> GetAllAsync()
+    public async Task<bool> DeleteAsync(Guid id)
     {
-        throw new NotImplementedException();
+        return await _repository.DeleteAsync(id);
     }
 
-    public Task<ProductResponseDto> GetByIdAsync(Guid id)
+    public async Task<IEnumerable<ProductResponseDto>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        var products = await _repository.GetAllAsync();
+
+        if (products is null) return null!;
+
+        return _mapper.Map<IEnumerable<ProductResponseDto>>(products);
     }
 
-    public Task<ProductResponseDto> UpdateAsync(Guid id, UpdateProductRequestDto createProductRequest)
+    public async Task<ProductResponseDto> GetByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        var product = await _repository.GetByIdAsync(id);
+
+        if (product is null) return null!;
+
+        return _mapper.Map<ProductResponseDto>(product);
+    }
+
+    public async Task<IEnumerable<ProductResponseDto>> GetProductsByCategoryId(Guid categoryId)
+    {
+        var products = await _repository.GetProductsByCategoryId(categoryId);
+
+        if (products is null) return null!;
+
+        return _mapper.Map<IEnumerable<ProductResponseDto>>(products);
+    }
+
+    public async Task<ProductResponseDto> UpdateAsync(Guid id, UpdateProductRequestDto  updateProductRequest)
+    {
+        var product = await _repository.GetByIdAsync(id);
+
+        if (product == null)
+            return null!;
+
+        _mapper.Map(updateProductRequest, product);
+
+        await _repository.UpdateAsync(product);
+
+        return _mapper.Map<ProductResponseDto>(product);
     }
 }

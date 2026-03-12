@@ -2,7 +2,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using the_alkanz.Website.Data;
+using the_alkanz.Website.Mappings;
 using the_alkanz.Website.Models;
+using the_alkanz.Website.Repositories;
+using the_alkanz.Website.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,7 +41,17 @@ builder.Services.AddDbContext<KanzDbContext>(
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                             .AddEntityFrameworkStores<KanzDbContext>();
 
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IBoxService, BoxService>();
+builder.Services.AddScoped<IBasketService, BasketService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

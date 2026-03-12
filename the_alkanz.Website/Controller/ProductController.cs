@@ -16,28 +16,64 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost]
-    public Task<ProductResponseDto> Creat(CreateProductRequestDto createProductRequest)
+    public async Task<ActionResult<ProductResponseDto>> Creat(CreateProductRequestDto createProductRequest)
     {
-        throw new NotImplementedException();
+        var product = await _productService.CreatAsync(createProductRequest);
+
+        if (product == null)
+                return BadRequest();
+
+        return Ok(product);
     }
-    [HttpDelete]
-    public Task<bool> Delete(Guid id)
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<bool>> Delete(Guid id)
     {
-        throw new NotImplementedException();
+        var deleteProduct = await _productService.DeleteAsync(id);
+
+        if (deleteProduct is false)
+                    return NotFound("Product not found !");
+
+        return NoContent();
     }
     [HttpGet]
-    public Task<IEnumerable<ProductResponseDto>> GetAll()
+    public async Task<ActionResult<IEnumerable<ProductResponseDto>>> GetAll()
     {
-        throw new NotImplementedException();
+        var products = await _productService.GetAllAsync();
+
+        if(products is null)  
+                    return NotFound();
+
+        return Ok(products);
     }
     [HttpGet("{id}")]
-    public Task<ProductResponseDto> GetById(Guid id)
+    public async Task<ActionResult<ProductResponseDto>> GetById(Guid id)
     {
-        throw new NotImplementedException();
+        var product = await _productService.GetByIdAsync(id);
+
+        if (product is null) 
+                    return NotFound("Product not found !");
+
+        return Ok(product);
     }
-    [HttpPut]
-    public Task<ProductResponseDto> Update(Guid id, UpdateProductRequestDto createProductRequest)
+    [HttpGet("{categoryId}/category")]
+    public async Task<ActionResult<IEnumerable<ProductResponseDto>>> GetProductsByCategoryId(Guid categoryId)
     {
-        throw new NotImplementedException();
+        var products = await _productService.GetProductsByCategoryId(categoryId);
+
+        if (products is null) 
+                    return NotFound("Product not found !");
+
+        return Ok(products);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ProductResponseDto>> Update(Guid id, UpdateProductRequestDto createProductRequest)
+    {
+        var productUpdate = await _productService.UpdateAsync(id, createProductRequest);
+
+        if (productUpdate is null) 
+                    return NotFound("Product not found !");
+
+        return Ok(productUpdate);
     }
 }
