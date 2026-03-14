@@ -1,4 +1,5 @@
-﻿using the_alkanz.Website.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using the_alkanz.Website.Data;
 using the_alkanz.Website.Models;
 
 namespace the_alkanz.Website.Repositories;
@@ -12,18 +13,35 @@ public class CategoryRepository : ICategoryRepository
         _context = context;
     }
 
-    public Task<Category> AddAsync(Category category)
+    public async Task<Category> AddAsync(Category category)
     {
-        throw new NotImplementedException();
+        _context.Categories.Add(category);
+
+        await _context.SaveChangesAsync();
+
+        return category;
+        
     }
 
-    public Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
-        throw new NotImplementedException();
+         var deleteCategory = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
+
+        if (deleteCategory is null) 
+                                return false;
+
+        _context.Categories.Remove(deleteCategory!);
+
+        await _context.SaveChangesAsync();
+
+        return true;
+
     }
 
-    public Task<IEnumerable<Category>> GetAllAsync()
+    public async Task<IEnumerable<Category>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        var categories = await _context.Categories.ToListAsync();
+
+        return categories;
     }
 }
