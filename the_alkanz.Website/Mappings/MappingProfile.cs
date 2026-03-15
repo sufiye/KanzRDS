@@ -26,7 +26,9 @@ public class MappingProfile : Profile
                        .ForMember(dest => dest.Id, opt => opt.Ignore())
                        .ForMember(dest => dest.Products, opt => opt.Ignore());
 
-  
+        CreateMap<ApplicationUser, AuthResponseDto>();
+
+
     }
 
   

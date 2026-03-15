@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
+using System.Text;
 using the_alkanz.Website.Data;
 using the_alkanz.Website.Mappings;
 using the_alkanz.Website.Models;
@@ -27,6 +31,34 @@ builder.Services.AddSwaggerGen(
 
          }
          );
+
+         var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile) ;
+
+         if(File.Exists(xmlPath)) option.IncludeXmlComments(xmlPath) ;
+
+         option.AddSecurityDefinition("Bearer",new OpenApiSecurityScheme
+         {
+             Description = "JWT Authorization header using Bearer scheme. \r\n\r\nExample: Bearer {token}",
+             Name = "Authorization",
+             In = ParameterLocation.Header,
+             Type = SecuritySchemeType.ApiKey,
+             Scheme = "Bearer"
+         });
+
+         option.AddSecurityRequirement(new OpenApiSecurityRequirement
+         {
+             {
+                 new OpenApiSecurityScheme
+                 {
+                     Reference = new OpenApiReference
+                     {
+                         Type = ReferenceType.SecurityScheme,
+                         Id = "Bearer"
+                     }
+                 },new string[]{}
+             }
+         });
      }
     );
 
@@ -38,8 +70,40 @@ builder.Services.AddDbContext<KanzDbContext>(
     option => option.UseSqlServer(connectionString)
     );
 
+
+
+
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                             .AddEntityFrameworkStores<KanzDbContext>();
+
+var jwtSettings = builder.Configuration.GetSection("JWTSettings");
+var secretKey = jwtSettings["SecretKey"];
+var issuer = jwtSettings["Issuer"];
+var audience = jwtSettings["Audience"];
+
+builder.Services.AddAuthentication(
+    options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(
+        options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = issuer,
+                ValidAudience = audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
+                ClockSkew = TimeSpan.Zero
+            };
+        }
+    );
+builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -73,8 +137,24 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
+
+using(var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        await RoleSeeder.SeedRoleAsync(services);
+    }
+    catch (Exception  ex )
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occured while seeding roles");
+    }
+}
 
 app.Run();
