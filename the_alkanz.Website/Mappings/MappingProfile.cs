@@ -41,6 +41,15 @@ public class MappingProfile : Profile
         CreateMap<CreateBasketItemRequestDto, BasketItem>()
                .ForMember(dest => dest.Id, opt => opt.Ignore())
                .ForMember(dest => dest.UserId, opt => opt.Ignore());
+
+       //Order
+
+        CreateMap<Order, OrderResponseDto>();
+        CreateMap<Order, OrderItemResponseDto>();
+
+        CreateMap<OrderStatusChange, Order>()
+                .ForMember(d => d.Id, opt => opt.Ignore());
+
     }
 
   

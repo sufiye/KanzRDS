@@ -15,3 +15,9 @@ public class OrderResponseDto
 
     public IEnumerable<OrderItemResponseDto> Items { get; set; } = new List<OrderItemResponseDto>();
 }
+
+public class OrderStatusChange
+{
+    public string Status { get; set; } = string.Empty ;
+}
+
