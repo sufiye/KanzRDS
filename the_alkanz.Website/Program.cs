@@ -14,7 +14,6 @@ using the_alkanz.Website.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 
-
 builder.Services.AddControllers();
 
 builder.Services.AddOpenApi();
@@ -114,6 +113,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
