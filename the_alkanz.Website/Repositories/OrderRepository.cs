@@ -16,7 +16,7 @@ public class OrderRepository : IOrderRepository
         _mapper = mapper;
     }
 
-    public async Task<OrderResponseDto> CreatOrderAsyc(Guid userId)
+    public async Task<OrderResponseDto> CreatOrderAsync(Guid userId)
     {
        var basketItems = await _context
                                     .BasketItems
@@ -24,8 +24,8 @@ public class OrderRepository : IOrderRepository
                                     .Where(x => x.UserId == userId)
                                     .ToListAsync();
 
-        if (!basketItems.Any())
-            throw new Exception("Basket is empty");
+        if (basketItems.Any() is false)
+                            return null!;
 
         var order = new Order
         {
@@ -63,20 +63,33 @@ public class OrderRepository : IOrderRepository
     }
 
 
-    public async Task<IEnumerable<OrderResponseDto>> GetOrderAsync(Guid userId)
+    public async Task<OrderResponseDto> GetOrderAsync(Guid userId)
     {
-        var orders = await _context
+        var order = await _context
                                 .Orders
                                 .Include(x => x.OrderItems)
                                 .FirstOrDefaultAsync(x => x.UserId == userId);
-        if (orders == null)
-            return null!;
+        if (order == null)
+                        return null!;
 
-        return _mapper.Map<IEnumerable<OrderResponseDto>>(orders);   
+        return _mapper.Map<OrderResponseDto>(order);   
     }
 
-    public Task<OrderResponseDto> OrderStatusChangeAsync(Guid userId, OrderStatusChange orderStatus)
+    public async Task<OrderResponseDto> OrderStatusChangeAsync(Guid userId,Guid orderId, OrderStatusChange orderStatus)
     {
-        throw new NotImplementedException();
+        var order = await _context
+                                .Orders
+                                .Include(x => x.OrderItems)
+                                .FirstOrDefaultAsync(o => o.UserId == userId && o.Id == orderId);
+
+        if(order == null) 
+                    return null!;
+
+        _mapper.Map(orderStatus, order);
+
+        await _context.SaveChangesAsync();
+
+        return _mapper.Map<OrderResponseDto>(order);
+
     }
 }

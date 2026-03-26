@@ -82,6 +82,7 @@ public class UpdateProductRequestDto
 
 public class ProductResponseDto
 {
+    public Guid Id { get; set; }
     /// <summary>
     /// The name of the candle.
     /// </summary>

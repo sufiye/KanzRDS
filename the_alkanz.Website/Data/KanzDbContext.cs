@@ -15,8 +15,6 @@ public class KanzDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<BasketItem>  BasketItems => Set<BasketItem>();
     public DbSet<Order>  Orders => Set<Order>();
     public DbSet<OrderItem>  OrderItems => Set<OrderItem>();
-    public DbSet<Box>  Boxes => Set<Box>();
-    public DbSet<BoxItem>  BoxItems => Set<BoxItem>();
     public DbSet<Category>  Categories => Set<Category>();
 
     protected override void OnModelCreating(ModelBuilder builder)

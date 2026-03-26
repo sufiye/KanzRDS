@@ -259,59 +259,6 @@ namespace the_alkanz.Website.Migrations
                     b.ToTable("BasketItems");
                 });
 
-            modelBuilder.Entity("the_alkanz.Website.Models.Box", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BoxName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("UserId1")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId1");
-
-                    b.ToTable("Boxes");
-                });
-
-            modelBuilder.Entity("the_alkanz.Website.Models.BoxItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BoxId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BoxId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("BoxItems");
-                });
-
             modelBuilder.Entity("the_alkanz.Website.Models.Category", b =>
                 {
                     b.Property<Guid>("Id")
@@ -339,8 +286,8 @@ namespace the_alkanz.Website.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int>("TotalPrice")
-                        .HasColumnType("int");
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -484,34 +431,6 @@ namespace the_alkanz.Website.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("the_alkanz.Website.Models.Box", b =>
-                {
-                    b.HasOne("the_alkanz.Website.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId1");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("the_alkanz.Website.Models.BoxItem", b =>
-                {
-                    b.HasOne("the_alkanz.Website.Models.Box", "Box")
-                        .WithMany("BoxItems")
-                        .HasForeignKey("BoxId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("the_alkanz.Website.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Box");
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("the_alkanz.Website.Models.Order", b =>
                 {
                     b.HasOne("the_alkanz.Website.Models.ApplicationUser", "User")
@@ -549,11 +468,6 @@ namespace the_alkanz.Website.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("the_alkanz.Website.Models.Box", b =>
-                {
-                    b.Navigation("BoxItems");
                 });
 
             modelBuilder.Entity("the_alkanz.Website.Models.Category", b =>

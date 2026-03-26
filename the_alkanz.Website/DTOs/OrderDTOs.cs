@@ -10,9 +10,8 @@ public class OrderResponseDto
 {
     public Guid Id { get; set; }
     public decimal TotalPrice { get; set; }
-    public DateTime OrderDate { get; set; }
+    public DateTimeOffset OrderDate { get; set; }
     public string Status { get; set; } = string.Empty;
-
     public IEnumerable<OrderItemResponseDto> Items { get; set; } = new List<OrderItemResponseDto>();
 }
 

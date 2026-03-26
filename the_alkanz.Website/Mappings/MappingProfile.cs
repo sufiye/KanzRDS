@@ -42,13 +42,21 @@ public class MappingProfile : Profile
                .ForMember(dest => dest.Id, opt => opt.Ignore())
                .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
-       //Order
+        //Order
 
-        CreateMap<Order, OrderResponseDto>();
-        CreateMap<Order, OrderItemResponseDto>();
+        CreateMap<Order, OrderResponseDto>()
+                .ForMember(dest => dest.Items,
+                       opt => opt.MapFrom(src => src.OrderItems));
 
-        CreateMap<OrderStatusChange, Order>()
-                .ForMember(d => d.Id, opt => opt.Ignore());
+        CreateMap<OrderItem, OrderItemResponseDto>();
+
+        CreateMap<OrderResponseDto, Order>();
+        CreateMap< OrderItemResponseDto , OrderItem>();
+
+
+        //Status
+
+        CreateMap<OrderStatusChange, Order>();
 
     }
 
