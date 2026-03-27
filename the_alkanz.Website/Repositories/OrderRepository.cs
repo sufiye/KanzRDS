@@ -62,6 +62,19 @@ public class OrderRepository : IOrderRepository
 
     }
 
+    public async Task<IEnumerable<OrderResponseDto>> GetAllOrderAsync()
+    {
+        var allOrders = await _context
+                                    .Orders
+                                    .Include(x => x.OrderItems)
+                                    .ToListAsync();
+
+        if (allOrders.Any() is false)
+                            return null!;
+
+        return _mapper.Map<IEnumerable<OrderResponseDto>>(allOrders);                   
+
+    }
 
     public async Task<OrderResponseDto> GetOrderAsync(Guid userId)
     {

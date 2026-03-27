@@ -21,7 +21,7 @@ public class OrderController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "Admin,User")]
-    public async Task<ActionResult<OrderResponseDto>> CreatOrderAsync()
+    public async Task<ActionResult<OrderResponseDto>> CreatOrder()
     {
         var order = await _orderService.CreatOrderAsync(UserId);
 
@@ -33,9 +33,9 @@ public class OrderController : ControllerBase
     }
     [HttpGet]
     [Authorize(Roles = "Admin,User")]
-    public async Task<ActionResult<OrderResponseDto>> GetAllOrderAsync()
+    public async Task<ActionResult<OrderResponseDto>> GetOrder()
     {
-        var orders = await _orderService.GetAllOrderAsync(UserId);
+        var orders = await _orderService.GetOrderAsync(UserId);
 
         if(orders is null)
                     return NotFound();
@@ -43,9 +43,21 @@ public class OrderController : ControllerBase
         return Ok(orders);
     }
 
+    [HttpGet("All")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<IEnumerable<OrderResponseDto>>> GetAllOrder()
+    {
+        var allOrders = await _orderService.GetAllOrderAsync();
+
+        if (allOrders is null)
+                    return NotFound("no orders found !");
+
+        return Ok(allOrders);
+    }
+
     [HttpPut]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<OrderResponseDto>> OrderStatusChangeAsync(Guid orderId, OrderStatusChange orderStatus)
+    public async Task<ActionResult<OrderResponseDto>> OrderStatusChange(Guid orderId, OrderStatusChange orderStatus)
     {
         var order = await _orderService
                                 .OrderStatusChangeAsync(UserId,orderId, orderStatus);

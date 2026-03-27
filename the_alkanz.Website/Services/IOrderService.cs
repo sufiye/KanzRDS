@@ -6,5 +6,6 @@ public interface IOrderService
 {
     public Task<OrderResponseDto> CreatOrderAsync(Guid userId);
     public Task<OrderResponseDto> OrderStatusChangeAsync(Guid userId, Guid orderId, OrderStatusChange orderStatus);
-    public Task<OrderResponseDto> GetAllOrderAsync(Guid userId);
+    public Task<OrderResponseDto> GetOrderAsync(Guid userId);
+    public Task<IEnumerable<OrderResponseDto>> GetAllOrderAsync();
 }
