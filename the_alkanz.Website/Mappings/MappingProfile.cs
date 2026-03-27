@@ -56,7 +56,9 @@ public class MappingProfile : Profile
 
         //Status
 
-        CreateMap<OrderStatusChange, Order>();
+        CreateMap<OrderStatusChange, Order>()
+              .ForMember(dest => dest.Status,
+                         opt => opt.MapFrom(src => Enum.Parse<OrderStatus>(src.Status))); 
 
     }
 

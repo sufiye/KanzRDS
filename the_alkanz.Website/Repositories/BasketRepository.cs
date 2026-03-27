@@ -19,16 +19,24 @@ public class BasketRepository : IBasketRepository
 
     public async Task<BasketResponseDto> AddToBasketAsync(Guid userId, CreateBasketItemRequestDto  createBasketItem)
     {
+        var product = await _context.Products
+                                .FirstOrDefaultAsync(x => x.Id == createBasketItem.ProductId);
+
         var basketItem = await _context.BasketItems
-            .FirstOrDefaultAsync(x => x.ProductId == createBasketItem.ProductId && x.UserId == userId);
+                                .FirstOrDefaultAsync(x => x.ProductId == createBasketItem.ProductId 
+                                                                               && x.UserId == userId);
 
         if (basketItem != null)
         {
+            if (basketItem.Quantity + createBasketItem.Quantity > product!.StockCount) return null!; 
+
             basketItem.Quantity += createBasketItem.Quantity;
         }
         else
         {
-            basketItem = new BasketItem
+            if (createBasketItem.Quantity > product!.StockCount) return null!;
+
+                basketItem = new BasketItem
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
