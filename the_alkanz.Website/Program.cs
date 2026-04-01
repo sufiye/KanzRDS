@@ -134,6 +134,7 @@ if (app.Environment.IsDevelopment())
                option.SwaggerEndpoint("/swagger/v1/swagger.json", "The_alkanz  API v1 ");
                option.RoutePrefix = string.Empty;
 
+               
                option.EnableTryItOutByDefault();
                option.EnableDeepLinking();
                option.EnableFilter();

@@ -12,7 +12,7 @@ using the_alkanz.Website.Data;
 namespace the_alkanz.Website.Migrations
 {
     [DbContext(typeof(KanzDbContext))]
-    [Migration("20260326070753_InitialCreate")]
+    [Migration("20260401103622_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -213,6 +213,9 @@ namespace the_alkanz.Website.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");

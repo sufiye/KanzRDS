@@ -11,17 +11,17 @@ public class CreateProductValidator : AbstractValidator<CreateProductRequestDto>
         RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("Name is required")
                 .MinimumLength(3).WithMessage("Name must be at least 3 characters long")
-                .MaximumLength(30);
+              ;
 
         RuleFor(x => x.Title)
                 .NotEmpty().WithMessage("Title is required")
                 .MinimumLength(5).WithMessage("Title must be at least 3 characters long")
-                .MaximumLength(30);
+                ;
 
         RuleFor(x => x.Description)
                .NotEmpty().WithMessage("Description is required")
                .MinimumLength(5).WithMessage("Description must be at least 3 characters long")
-               .MaximumLength(30);
+               ;
 
         RuleFor(x => x.CategoryId)
                .NotEmpty().WithMessage("Category is required");

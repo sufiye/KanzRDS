@@ -8,8 +8,12 @@ public class OrderStatusChangeValidator : AbstractValidator<OrderStatusChange>
 {
     public OrderStatusChangeValidator()
     {
+     
+
         RuleFor(x => x.Status)
             .NotEmpty().WithMessage("Status is required !")
-            .IsInEnum().WithMessage("Status must be one of:0(Pending), 1(Shipped), 2(Delivered)"); 
+            .Must(s => new [] {OrderStatus.Pending.ToString(),
+                               OrderStatus.Shipped.ToString(),
+                               OrderStatus.Delivered.ToString()}.Contains(s)).WithMessage("Status must be one of:0(Pending), 1(Shipped), 2(Delivered)");
     }
 }

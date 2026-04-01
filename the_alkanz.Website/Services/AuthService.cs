@@ -84,6 +84,16 @@ public class AuthService : IAuthService
 
     }
 
+    public async Task<AuthResponseDto?> RefreshTokenAsync(RefreshTokenRequest refreshTokenRequest)
+    {
+        var user = await _userManager.Users.
+                            FirstOrDefaultAsync(r => r.RefreshToken == refreshTokenRequest.RefreshToken);
+        if (user == null)
+                         return null!;
+
+        return await CreatTokenAsync(user);
+    }
+
     public async Task<AuthResponseDto> RegisterAsync(RegisterRequest registerRequest)
     {
         var existingUser = await _userManager.FindByEmailAsync(registerRequest.Email);
@@ -177,11 +187,17 @@ public class AuthService : IAuthService
             signingCredentials: credetials
             );
 
+        var refreshToken = Guid.NewGuid().ToString("N").ToLower();
+        user.RefreshToken = refreshToken;
+
+        await _userManager.UpdateAsync(user);
+
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
         return new AuthResponseDto
         {
             AccessToken = tokenString,
+            RefreshToken = refreshToken,
             ExpiredAt = DateTime.UtcNow.AddMinutes(expirationInMinutes),
             Email = user.Email!,
             Roles = roles

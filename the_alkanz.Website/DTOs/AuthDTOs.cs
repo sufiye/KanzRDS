@@ -121,6 +121,7 @@ public class AuthResponseDto
     /// </summary>
     /// <example>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</example>
     public string AccessToken { get; set; } = string.Empty;
+    public string RefreshToken { get; set; } = string.Empty;
 
     /// <summary>
     /// Expiration date and time of the access token.
@@ -133,4 +134,9 @@ public class AuthResponseDto
     /// </summary>
     /// <example>[ "Admin", "User" ]</example>
     public IEnumerable<string> Roles { get; set; } = new List<string>();
+}
+
+public class RefreshTokenRequest
+{
+    public string RefreshToken { get; set; } = string.Empty;    
 }

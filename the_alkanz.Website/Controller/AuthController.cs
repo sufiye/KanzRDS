@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using the_alkanz.Website.DTOs;
@@ -107,5 +108,17 @@ public class AuthController : ControllerBase
         if (result == false) return NotFound("Can not delete this user");
 
         return NoContent();
+    }
+
+    [HttpPost("refreshToken")]
+    public async Task<ActionResult<AuthResponseDto>> RefreshToken(RefreshTokenRequest refreshTokenRequest)
+    {
+        var user = await _authService.RefreshTokenAsync(refreshTokenRequest);
+
+        if (user == null)
+            return Unauthorized();
+
+        return Ok(user);
+              
     }
 }
