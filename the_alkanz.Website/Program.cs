@@ -112,14 +112,13 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IBasketService, BasketService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IAttachmentService, AttachmentService>();
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IAttachmentService, AttachmentService>();
 builder.Services.AddScoped<IFileStorage, LocalDiskStorage>();
 
 builder.Services.AddFluentValidationAutoValidation();

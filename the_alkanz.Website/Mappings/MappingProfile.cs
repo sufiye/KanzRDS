@@ -58,6 +58,15 @@ public class MappingProfile : Profile
 
         CreateMap<OrderStatusChange, Order>();
 
+        CreateMap<Product, ProductResponseDto>()
+                .ForMember(dest => dest.Attachments,
+                       opt => opt.MapFrom(src => src.Attachments));
+
+        CreateMap<ProductAttachment, AttechmentResponseDto>();
+
+        CreateMap<ProductResponseDto, Product>();
+        CreateMap<AttechmentResponseDto, ProductAttachment>();
+
     }
 
   

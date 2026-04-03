@@ -92,7 +92,7 @@ public class AttachmentService : IAttachmentService
         if (att is null)
             return null;
 
-        var key = $"tasks/{att.ProductId}/{att.StoredFileName}";
+        var key = $"products/{att.ProductId}/{att.StoredFileName}";
 
         var stream = await _storage.OpenAsync(key, cancellationToken);
 
@@ -101,7 +101,6 @@ public class AttachmentService : IAttachmentService
     public async Task<TaskAttachmentInfo?> GetAttachmentInfoAsync(Guid attachmentId, CancellationToken cancellationToken = default)
     {
         var att = await _context.ProductAttachments
-                                      .Include(a => a.ProductId)
                                       .FirstOrDefaultAsync(a => a.Id == attachmentId);
 
         if (att is null)
@@ -112,7 +111,7 @@ public class AttachmentService : IAttachmentService
             Id = att.Id,
             productId = att.ProductId,
             StoredFileName = att.StoredFileName,
-            StorageKey = $"tasks/{att.ProductId}/{att.StoredFileName}",
+            StorageKey = $"products/{att.ProductId}/{att.StoredFileName}",
             UploadedUserId = att.UploadedUserId
         };
     }
@@ -123,7 +122,7 @@ public class AttachmentService : IAttachmentService
         if (att is null)
             return false;
 
-        var key = $"tasks/{att.ProductId}/{att.StoredFileName}";
+        var key = $"products/{att.ProductId}/{att.StoredFileName}";
 
         _context.ProductAttachments.Remove(att);
 

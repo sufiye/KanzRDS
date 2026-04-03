@@ -118,4 +118,6 @@ public class ProductResponseDto
     /// </summary>
     /// <example>30</example>
     public int StockCount { get; set; }
+
+    public List<AttechmentResponseDto> Attachments { get; set; } = new List<AttechmentResponseDto>();
 }

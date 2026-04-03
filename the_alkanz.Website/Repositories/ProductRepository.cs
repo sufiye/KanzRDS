@@ -42,7 +42,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<IEnumerable<Product>> GetAllAsync()
     {
-        var products = await _context.Products.ToListAsync();
+        var products = await _context.Products.Include(p=>p.Attachments).ToListAsync();
 
         return products;
 
