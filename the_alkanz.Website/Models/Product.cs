@@ -13,4 +13,6 @@ public class Product
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedAt { get; set; } = null!;
 
+    public ICollection<ProductAttachment> Attachments { get; set; } = new List<ProductAttachment>();
+
 }

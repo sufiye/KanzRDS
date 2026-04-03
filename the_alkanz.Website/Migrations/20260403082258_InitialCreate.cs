@@ -267,6 +267,36 @@ namespace the_alkanz.Website.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ProductAttachments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OriginalFileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StoredFileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Size = table.Column<long>(type: "bigint", nullable: false),
+                    UploadedUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UploadedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductAttachments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductAttachments_AspNetUsers_UploadedUserId",
+                        column: x => x.UploadedUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductAttachments_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -327,6 +357,16 @@ namespace the_alkanz.Website.Migrations
                 column: "UserId1");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProductAttachments_ProductId",
+                table: "ProductAttachments",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductAttachments_UploadedUserId",
+                table: "ProductAttachments",
+                column: "UploadedUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Products_CategoryId",
                 table: "Products",
                 column: "CategoryId");
@@ -355,6 +395,9 @@ namespace the_alkanz.Website.Migrations
 
             migrationBuilder.DropTable(
                 name: "OrderItems");
+
+            migrationBuilder.DropTable(
+                name: "ProductAttachments");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

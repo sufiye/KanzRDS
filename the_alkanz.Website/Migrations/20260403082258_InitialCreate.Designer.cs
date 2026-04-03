@@ -12,7 +12,7 @@ using the_alkanz.Website.Data;
 namespace the_alkanz.Website.Migrations
 {
     [DbContext(typeof(KanzDbContext))]
-    [Migration("20260401103622_InitialCreate")]
+    [Migration("20260403082258_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -375,6 +375,46 @@ namespace the_alkanz.Website.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("the_alkanz.Website.Models.ProductAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("UploadedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("UploadedUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UploadedUserId");
+
+                    b.ToTable("ProductAttachments");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -476,6 +516,25 @@ namespace the_alkanz.Website.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("the_alkanz.Website.Models.ProductAttachment", b =>
+                {
+                    b.HasOne("the_alkanz.Website.Models.Product", "Product")
+                        .WithMany("Attachments")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("the_alkanz.Website.Models.ApplicationUser", "UploadedUser")
+                        .WithMany()
+                        .HasForeignKey("UploadedUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("UploadedUser");
+                });
+
             modelBuilder.Entity("the_alkanz.Website.Models.Category", b =>
                 {
                     b.Navigation("Products");
@@ -484,6 +543,11 @@ namespace the_alkanz.Website.Migrations
             modelBuilder.Entity("the_alkanz.Website.Models.Order", b =>
                 {
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("the_alkanz.Website.Models.Product", b =>
+                {
+                    b.Navigation("Attachments");
                 });
 #pragma warning restore 612, 618
         }
