@@ -1,4 +1,5 @@
-﻿using the_alkanz.Website.DTOs;
+﻿using the_alkanz.Website.common;
+using the_alkanz.Website.DTOs;
 
 namespace the_alkanz.Website.Services;
 
@@ -8,6 +9,7 @@ public interface IProductService
     public Task<ProductResponseDto> UpdateAsync(Guid id,UpdateProductRequestDto  updateProductRequest);
     public Task<IEnumerable<ProductResponseDto>> GetAllAsync();
     public Task<ProductResponseDto> GetByIdAsync(Guid id);
+    Task<PageResult<ProductResponseDto>> GetPagedAsync(ProductQueryParams  productQueryParams);
     public Task<IEnumerable<ProductResponseDto>> GetProductsByCategoryId(Guid categoryId);
     public Task<bool> DeleteAsync(Guid id);
 

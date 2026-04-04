@@ -165,6 +165,7 @@ if (app.Environment.IsDevelopment())
         );
     app.MapOpenApi();
 }
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 

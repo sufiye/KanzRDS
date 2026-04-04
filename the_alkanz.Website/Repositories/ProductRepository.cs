@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using the_alkanz.Website.common;
 using the_alkanz.Website.Data;
 using the_alkanz.Website.DTOs;
 using the_alkanz.Website.Models;
@@ -57,6 +58,56 @@ public class ProductRepository : IProductRepository
         return product!;
     }
 
+    public async Task<PageResult<Product>> GetPagedAsync(ProductQueryParams productQueryParams)
+    {
+        productQueryParams.Validate();
+
+        var query = _context.Products.Include(p => p.Attachments).AsQueryable();
+
+        if (!string.IsNullOrEmpty(productQueryParams.Search))
+        {
+            var searchTerm = productQueryParams.Search.ToLower();
+            query = query.Where(p =>
+                p.Name.ToLower().Contains(searchTerm)
+            );
+        }
+        if (!string.IsNullOrEmpty(productQueryParams.SearchTittle))
+        {
+            var searchTerm = productQueryParams.SearchTittle.ToLower();
+            query = query.Where(p =>  
+                p.Title.ToLower().Contains(searchTerm)     
+            );
+        }
+        if (!string.IsNullOrEmpty(productQueryParams.SearchDescription))
+        {
+            var searchTerm = productQueryParams.SearchDescription.ToLower();
+            query = query.Where(p =>
+                p.Description.ToLower().Contains(searchTerm)
+            );
+        }
+
+        if (!string.IsNullOrEmpty(productQueryParams.Sort))
+        {
+            query = ApplySorting(query, productQueryParams.Sort, productQueryParams.SortDirection);
+        }
+        else
+        {
+            query = query.OrderBy(p => p.Id);
+        }
+
+        var totalCount = await query.CountAsync();
+        var skip = (productQueryParams.Page - 1) * productQueryParams.PageSize;
+        var itemsSkip = await query.Skip(skip).Take(productQueryParams.PageSize).ToListAsync();
+
+ 
+        return PageResult<Product>.Creat(
+            itemsSkip,
+            productQueryParams.Page,
+            productQueryParams.PageSize,
+            totalCount
+        );
+    }
+
     public async Task<IEnumerable<Product>> GetProductsByCategoryId(Guid categoryId)
     {
         var products = await _context.Products.Where(p=>p.CategoryId == categoryId).ToListAsync();
@@ -69,6 +120,44 @@ public class ProductRepository : IProductRepository
         
         _context.Products.Update(product);
         await _context.SaveChangesAsync();
+    }
+
+    private IQueryable<Product> ApplySorting(IQueryable<Product> query, string sort, string? sortDirection)
+    {
+        var isDesc = sortDirection?.ToLower() == "desc";
+
+        return sort.ToLower() switch
+        {
+
+            "name" => isDesc ?
+                                query.OrderByDescending(p => p.Name) : 
+                                query.OrderBy(p => p.Name),
+
+            "title" => isDesc ?
+                                query.OrderByDescending(p => p.Title) : 
+                                query.OrderBy(p => p.Title),
+            "description" => isDesc ? 
+                                query.OrderByDescending(p => p.Description) :
+                                query.OrderBy(p => p.Description),
+
+            "price" => isDesc ? 
+                                query.OrderByDescending(p => p.Price) :
+                                query.OrderBy(p => p.Price),
+
+            "stockcount" => isDesc ?
+                                query.OrderByDescending(p => p.StockCount) :
+                                query.OrderBy(p => p.StockCount),
+
+            "createdat" => isDesc ? 
+                                query.OrderByDescending(p => p.CreatedAt) : 
+                                query.OrderBy(p => p.CreatedAt),
+
+            "updatedat" => isDesc ? 
+                                query.OrderByDescending(p => p.UpdatedAt) : 
+                                query.OrderBy(p => p.UpdatedAt),
+
+            _ => query.OrderBy(p => p.Id)
+        };
     }
 
 }

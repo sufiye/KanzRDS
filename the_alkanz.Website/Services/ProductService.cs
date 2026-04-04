@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using the_alkanz.Website.common;
 using the_alkanz.Website.DTOs;
 using the_alkanz.Website.Models;
 using the_alkanz.Website.Repositories;
@@ -46,6 +47,22 @@ public class ProductService : IProductService
         if (product is null) return null!;
 
         return _mapper.Map<ProductResponseDto>(product);
+    }
+
+    public async Task<PageResult<ProductResponseDto>> GetPagedAsync(ProductQueryParams productQueryParams)
+    {
+   
+        var pagedProducts = await _repository.GetPagedAsync(productQueryParams); 
+
+        
+        var productDtos = _mapper.Map<IEnumerable<ProductResponseDto>>(pagedProducts.Items);
+
+        return PageResult<ProductResponseDto>.Creat(
+            productDtos,
+            pagedProducts.Page,
+            pagedProducts.PageSize,
+            pagedProducts.TotalCount
+        );
     }
 
     public async Task<IEnumerable<ProductResponseDto>> GetProductsByCategoryId(Guid categoryId)

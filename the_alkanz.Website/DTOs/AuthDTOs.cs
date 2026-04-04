@@ -138,5 +138,9 @@ public class AuthResponseDto
 
 public class RefreshTokenRequest
 {
-    public string RefreshToken { get; set; } = string.Empty;    
+    /// <summary>
+    /// The refresh token previously issued to the user.
+    /// </summary>
+    /// <example>3fa85f64-5717-4562-b3fc-2c963f66afa6</example>
+    public string RefreshToken { get; set; } = string.Empty;
 }

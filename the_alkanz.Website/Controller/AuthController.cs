@@ -110,6 +110,13 @@ public class AuthController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Refreshes the access token using a valid refresh token.
+    /// </summary>
+    /// <param name="refreshTokenRequest">Request containing the refresh token.</param>
+    /// <returns>Authentication response containing a new access token.</returns>
+    /// <response code="200">Token successfully refreshed.</response>
+    /// <response code="401">Invalid or expired refresh token.</response>
     [HttpPost("refreshToken")]
     public async Task<ActionResult<AuthResponseDto>> RefreshToken(RefreshTokenRequest refreshTokenRequest)
     {
@@ -119,6 +126,5 @@ public class AuthController : ControllerBase
             return Unauthorized();
 
         return Ok(user);
-              
     }
 }

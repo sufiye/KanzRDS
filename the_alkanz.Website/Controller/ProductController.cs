@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using the_alkanz.Website.common;
 using the_alkanz.Website.DTOs;
 using the_alkanz.Website.Services;
 
@@ -66,7 +67,7 @@ public class ProductController : ControllerBase
     /// <response code="404">No products found.</response>
     /// <response code="401">Unauthorized request.</response>
     [HttpGet]
-    [Authorize(Roles = "Admin,User")]
+   
     public async Task<ActionResult<IEnumerable<ProductResponseDto>>> GetAll()
     {
         var products = await _productService.GetAllAsync();
@@ -95,6 +96,21 @@ public class ProductController : ControllerBase
             return NotFound("Product not found !");
 
         return Ok(product);
+    }
+    /// <summary>
+    /// Retrieves a paginated list of products based on the provided query parameters.
+    /// </summary>
+    /// <param name="productQuery">The query parameters for pagination, filtering, and sorting.</param>
+    /// <returns>A paged result containing products and pagination info.</returns>
+    /// <response code="200">Returns a paginated list of products.</response>
+    /// <response code="400">Invalid query parameters.</response>
+    /// <response code="401">Unauthorized request.</response>
+    [HttpGet("pagedResult")]
+    [ProducesResponseType(typeof(PageResult<ProductResponseDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PageResult<ProductResponseDto>>> GetPaged([FromQuery] ProductQueryParams productQuery)
+    {
+        var products = await _productService.GetPagedAsync(productQuery);
+        return Ok(products);
     }
 
     /// <summary>
