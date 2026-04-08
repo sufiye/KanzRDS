@@ -87,7 +87,7 @@ public class ProductController : ControllerBase
     /// <response code="404">Product not found.</response>
     /// <response code="401">Unauthorized request.</response>
     [HttpGet("{id:guid}")]
-    [Authorize(Roles = "Admin,User")]
+    
     public async Task<ActionResult<ProductResponseDto>> GetById(Guid id)
     {
         var product = await _productService.GetByIdAsync(id);

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using the_alkanz.Website.DTOs;
 using the_alkanz.Website.Models;
 using the_alkanz.Website.Repositories;
@@ -39,6 +40,12 @@ namespace the_alkanz.Website.Services
             var categories = await _repository.GetAllAsync();
 
             return _mapper.Map<IEnumerable<CategoryResponseDto>>(categories);
+        }
+        public async Task<CategoryResponseDto> GetByIdAsync(Guid id)
+        {
+            var category = await _repository.GetByIdAsync(id);
+
+            return _mapper.Map<CategoryResponseDto>(category)!;
         }
     }
 }

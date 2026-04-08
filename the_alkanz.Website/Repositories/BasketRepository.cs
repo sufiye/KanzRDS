@@ -19,7 +19,7 @@ public class BasketRepository : IBasketRepository
 
     public async Task<BasketResponseDto> AddToBasketAsync(Guid userId, CreateBasketItemRequestDto  createBasketItem)
     {
-        var product = await _context.Products
+        var product = await _context.Products.Include(b =>b.Attachments)
                                 .FirstOrDefaultAsync(x => x.Id == createBasketItem.ProductId);
 
         var basketItem = await _context.BasketItems
@@ -71,6 +71,7 @@ public class BasketRepository : IBasketRepository
         var basketItems = await _context.BasketItems
             .Where(x => x.UserId == UserId)
             .Include(x => x.Product)
+            .ThenInclude(x=>x.Attachments)
             .ToListAsync();
 
         return _mapper.Map<IEnumerable<BasketResponseDto>>(basketItems);

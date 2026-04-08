@@ -51,7 +51,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product> GetByIdAsync(Guid id)
     {
-        var product = await _context.Products.FirstOrDefaultAsync(p=>p.Id == id);
+        var product = await _context.Products.Include(p => p.Attachments).FirstOrDefaultAsync(p=>p.Id == id);
 
         if (product is null) return null!;
 

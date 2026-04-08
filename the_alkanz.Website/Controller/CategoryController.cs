@@ -67,7 +67,7 @@ public class CategoryController : ControllerBase
     /// <response code="401">Unauthorized request.</response>
     /// <response code="403">User does not have permission to access categories.</response>
     [HttpGet]
-    [Authorize(Roles = "Admin,User")]
+
     public async Task<ActionResult<IEnumerable<CategoryResponseDto>>> GetAll()
     {
         var categories = await _categoryService.GetAllAsync();
@@ -76,5 +76,12 @@ public class CategoryController : ControllerBase
             return NotFound();
 
         return Ok(categories);
+    }
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<CategoryResponseDto>> GetById(Guid id)
+    {
+        var category = await _categoryService.GetByIdAsync(id);
+
+        return Ok(category);
     }
 }
