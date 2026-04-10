@@ -24,6 +24,7 @@ public class CreateBasketItemRequestDto
 /// </summary>
 public class BasketResponseDto
 {
+    public Guid Id { get; set; }
     /// <summary>
     /// The product information included in the basket item.
     /// </summary>

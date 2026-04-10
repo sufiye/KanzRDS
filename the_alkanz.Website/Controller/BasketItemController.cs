@@ -70,7 +70,7 @@ public class BasketItemController : ControllerBase
     /// <returns>No content if deletion is successful.</returns>
     /// <response code="204">Basket item successfully deleted.</response>
     /// <response code="404">Basket item not found.</response>
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     [Authorize(Roles = "Admin,User")]
     public async Task<ActionResult<bool>> Delete(Guid id)
     {
