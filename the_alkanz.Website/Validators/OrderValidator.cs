@@ -14,6 +14,7 @@ public class OrderStatusChangeValidator : AbstractValidator<OrderStatusChange>
             .NotEmpty().WithMessage("Status is required !")
             .Must(s => new [] {OrderStatus.Pending.ToString(),
                                OrderStatus.Shipped.ToString(),
-                               OrderStatus.Delivered.ToString()}.Contains(s)).WithMessage("Status must be one of:0(Pending), 1(Shipped), 2(Delivered)");
+                               OrderStatus.Delivered.ToString()
+            }.Contains(s)).WithMessage("Status must be one of:0(Pending), 1(Shipped), 2(Delivered)");
     }
 }

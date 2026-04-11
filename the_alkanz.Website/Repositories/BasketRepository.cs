@@ -66,13 +66,27 @@ public class BasketRepository : IBasketRepository
         return true;
     }
 
-    public async Task<IEnumerable<BasketResponseDto>> GetBasketItemAsync(Guid UserId)
+    public async Task<IEnumerable<BasketResponseDto>> GetBasketItemAsync(Guid userId)
     {
         var basketItems = await _context.BasketItems
-            .Where(x => x.UserId == UserId)
+            .Where(x => x.UserId == userId)
             .Include(x => x.Product)
-            .ThenInclude(x=>x.Attachments)
+            .ThenInclude(x => x.Attachments)
             .ToListAsync();
+
+        var invalidItems = basketItems
+            .Where(x => x.Product == null)
+            .ToList();
+
+        if (invalidItems.Any())
+        {
+            _context.BasketItems.RemoveRange(invalidItems);
+            await _context.SaveChangesAsync();
+
+            basketItems = basketItems
+                .Except(invalidItems)
+                .ToList();
+        }
 
         return _mapper.Map<IEnumerable<BasketResponseDto>>(basketItems);
     }

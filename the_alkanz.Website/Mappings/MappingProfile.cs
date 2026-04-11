@@ -33,6 +33,7 @@ public class MappingProfile : Profile
         //User
 
         CreateMap<ApplicationUser, AuthResponseDto>();
+        CreateMap<ApplicationUser, UserResponseDto>();
 
         //BasketItem
 

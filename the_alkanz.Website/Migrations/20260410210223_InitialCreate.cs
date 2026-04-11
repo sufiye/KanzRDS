@@ -277,18 +277,11 @@ namespace the_alkanz.Website.Migrations
                     StoredFileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Size = table.Column<long>(type: "bigint", nullable: false),
-                    UploadedUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     UploadedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProductAttachments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ProductAttachments_AspNetUsers_UploadedUserId",
-                        column: x => x.UploadedUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ProductAttachments_Products_ProductId",
                         column: x => x.ProductId,
@@ -360,11 +353,6 @@ namespace the_alkanz.Website.Migrations
                 name: "IX_ProductAttachments_ProductId",
                 table: "ProductAttachments",
                 column: "ProductId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProductAttachments_UploadedUserId",
-                table: "ProductAttachments",
-                column: "UploadedUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_CategoryId",

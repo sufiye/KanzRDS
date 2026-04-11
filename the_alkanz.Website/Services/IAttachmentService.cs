@@ -10,7 +10,6 @@ public interface IAttachmentService
             string originalFileName,
             string contentType,
             long length,
-            string userId,
             CancellationToken cancellationToken = default);
 
 
@@ -28,5 +27,4 @@ public class TaskAttachmentInfo
     public Guid productId { get; set; }
     public string StoredFileName { get; set; } = string.Empty;
     public string StorageKey { get; set; } = string.Empty;
-    public string UploadedUserId { get; set; } = string.Empty;
 }

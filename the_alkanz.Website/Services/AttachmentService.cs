@@ -9,15 +9,14 @@ namespace the_alkanz.Website.Services;
 public class AttachmentService : IAttachmentService
 {
     public const long MaxFileSizeBytes = 5 * 1024 * 1024;
-    public static readonly string[] AllowedExtensions = {
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".pdf",
-        ".txt",
-        ".zip"
+
+    public static readonly string[] AllowedExtensions =
+    {
+        ".jpg", ".jpeg", ".png", ".pdf", ".txt", ".zip"
     };
-    public static readonly string[] AllowedContentTypes = {
+
+    public static readonly string[] AllowedContentTypes =
+    {
         "image/jpeg",
         "image/png",
         "application/pdf",
@@ -35,27 +34,39 @@ public class AttachmentService : IAttachmentService
         _storage = storage;
     }
 
-    public async Task<AttechmentResponseDto?> UploadAsync(Guid productId, Stream fileStream, string originalFileName, string contentType, long length, string userId, CancellationToken cancellationToken = default)
+    public async Task<AttechmentResponseDto?> UploadAsync(
+        Guid productId,
+        Stream fileStream,
+        string originalFileName,
+        string contentType,
+        long length,
+        CancellationToken cancellationToken = default)
     {
         if (length > MaxFileSizeBytes)
-            throw new ArgumentException($"File size must not exceed {MaxFileSizeBytes / (1024 * 1024)} MB");
+            throw new ArgumentException("File too large (max 5MB)");
 
         var ext = Path.GetExtension(originalFileName).ToLowerInvariant();
 
         if (string.IsNullOrEmpty(ext) || !AllowedExtensions.Contains(ext))
-            throw new ArgumentException($"Allowed types: {string.Join(", ", AllowedExtensions)}");
+            throw new ArgumentException("Invalid file extension");
 
         if (!AllowedContentTypes.Contains(contentType, StringComparer.OrdinalIgnoreCase))
-            throw new ArgumentException($"Allowed content types: {string.Join(", ", AllowedContentTypes)}");
+            throw new ArgumentException("Invalid content type");
 
-        var task = await _context.Products.FindAsync([productId], cancellationToken);
+        var product = await _context.Products.FindAsync([productId], cancellationToken);
 
-        if (task is null)
+        if (product is null)
             return null;
 
         var folderKey = $"products/{productId}";
 
-        var info = await _storage.UploadAsync(fileStream, originalFileName, contentType, folderKey, cancellationToken);
+        var info = await _storage.UploadAsync(
+            fileStream,
+            originalFileName,
+            contentType,
+            folderKey,
+            cancellationToken
+        );
 
         var attachment = new ProductAttachment
         {
@@ -64,12 +75,10 @@ public class AttachmentService : IAttachmentService
             StoredFileName = info.StoredFileName,
             ContentType = contentType,
             Size = info.Size,
-            UploadedUserId = userId,
             UploadedAt = DateTimeOffset.UtcNow
         };
 
         _context.ProductAttachments.Add(attachment);
-
         await _context.SaveChangesAsync(cancellationToken);
 
         return new AttechmentResponseDto
@@ -79,15 +88,16 @@ public class AttachmentService : IAttachmentService
             OriginalFileName = attachment.OriginalFileName,
             ContentType = attachment.ContentType,
             Size = attachment.Size,
-            UploadedUserId = attachment.UploadedUserId,
             UploadedAt = attachment.UploadedAt
         };
-
-
     }
-    public async Task<(Stream stream, string fileName, string contentType)?> GetDownloadAsync(Guid attachmentId, CancellationToken cancellationToken = default)
+
+    public async Task<(Stream stream, string fileName, string contentType)?> GetDownloadAsync(
+        Guid attachmentId,
+        CancellationToken cancellationToken = default)
     {
-        var att = await _context.ProductAttachments.FirstOrDefaultAsync(a => a.Id == attachmentId, cancellationToken);
+        var att = await _context.ProductAttachments
+            .FirstOrDefaultAsync(a => a.Id == attachmentId, cancellationToken);
 
         if (att is null)
             return null;
@@ -98,10 +108,13 @@ public class AttachmentService : IAttachmentService
 
         return (stream, att.OriginalFileName, att.ContentType);
     }
-    public async Task<TaskAttachmentInfo?> GetAttachmentInfoAsync(Guid attachmentId, CancellationToken cancellationToken = default)
+
+    public async Task<TaskAttachmentInfo?> GetAttachmentInfoAsync(
+        Guid attachmentId,
+        CancellationToken cancellationToken = default)
     {
         var att = await _context.ProductAttachments
-                                      .FirstOrDefaultAsync(a => a.Id == attachmentId);
+            .FirstOrDefaultAsync(a => a.Id == attachmentId, cancellationToken);
 
         if (att is null)
             return null;
@@ -111,13 +124,16 @@ public class AttachmentService : IAttachmentService
             Id = att.Id,
             productId = att.ProductId,
             StoredFileName = att.StoredFileName,
-            StorageKey = $"products/{att.ProductId}/{att.StoredFileName}",
-            UploadedUserId = att.UploadedUserId
+            StorageKey = $"products/{att.ProductId}/{att.StoredFileName}"
         };
     }
-    public async Task<bool> DeleteAsync(Guid attachmentId, CancellationToken cancellationToken = default)
+
+    public async Task<bool> DeleteAsync(
+        Guid attachmentId,
+        CancellationToken cancellationToken = default)
     {
-        var att = await _context.ProductAttachments.FirstOrDefaultAsync(a => a.Id == attachmentId);
+        var att = await _context.ProductAttachments
+            .FirstOrDefaultAsync(a => a.Id == attachmentId, cancellationToken);
 
         if (att is null)
             return false;
@@ -131,6 +147,4 @@ public class AttachmentService : IAttachmentService
 
         return true;
     }
-
-
 }

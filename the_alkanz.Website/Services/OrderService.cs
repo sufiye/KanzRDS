@@ -35,20 +35,20 @@ public class OrderService : IOrderService
         return _mapper.Map<IEnumerable<OrderResponseDto>>(allOrders);
     }
 
-    public async Task<OrderResponseDto> GetOrderAsync(Guid userId)
+    public async Task<IEnumerable<OrderResponseDto>> GetOrderUserAllAsync(Guid userId)
     {
-        var order = await _orderRepository.GetOrderAsync(userId);
+        var order = await _orderRepository.GetOrderUserAllAsync(userId);
 
         if (order  is null) 
                         return null!;
 
-        return _mapper.Map<OrderResponseDto>(order);
+        return _mapper.Map<IEnumerable<OrderResponseDto>>(order);
     }
 
-    public async Task<OrderResponseDto> OrderStatusChangeAsync(Guid userId, Guid orderId, OrderStatusChange orderStatus)
+    public async Task<OrderResponseDto> OrderStatusChangeAsync( Guid orderId, OrderStatusChange orderStatus)
     {
         var order = await _orderRepository
-                                .OrderStatusChangeAsync(userId, orderId, orderStatus);
+                                .OrderStatusChangeAsync( orderId, orderStatus);
 
         if (order == null) 
                         return null!;

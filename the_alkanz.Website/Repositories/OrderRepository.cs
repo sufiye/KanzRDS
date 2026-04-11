@@ -76,24 +76,25 @@ public class OrderRepository : IOrderRepository
 
     }
 
-    public async Task<OrderResponseDto> GetOrderAsync(Guid userId)
+    public async Task<IEnumerable<OrderResponseDto>> GetOrderUserAllAsync(Guid userId)
     {
         var order = await _context
                                 .Orders
                                 .Include(x => x.OrderItems)
-                                .FirstOrDefaultAsync(x => x.UserId == userId);
+                                .Where(x => x.UserId == userId)
+                                .ToListAsync();
         if (order == null)
                         return null!;
 
-        return _mapper.Map<OrderResponseDto>(order);   
+        return _mapper.Map<IEnumerable<OrderResponseDto>>(order);   
     }
 
-    public async Task<OrderResponseDto> OrderStatusChangeAsync(Guid userId,Guid orderId, OrderStatusChange orderStatus)
+    public async Task<OrderResponseDto> OrderStatusChangeAsync(Guid orderId, OrderStatusChange orderStatus)
     {
         var order = await _context
                                 .Orders
                                 .Include(x => x.OrderItems)
-                                .FirstOrDefaultAsync(o => o.UserId == userId && o.Id == orderId);
+                                .FirstOrDefaultAsync(o => o.Id == orderId);
 
         if(order == null) 
                     return null!;

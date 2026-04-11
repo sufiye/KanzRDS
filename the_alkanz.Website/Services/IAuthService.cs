@@ -10,5 +10,6 @@ public interface IAuthService
   
     Task<AuthResponseDto> UpdateAsync(Guid id, UpdateRequest updateRequest);
     Task<AuthResponseDto> PasswordChangeAsync(Guid id, PasswordUpdate passwordUpdate);
+    Task<UserResponseDto> GetUserInfoAsync(Guid id);
     Task<bool> DeleteAsync(Guid id);
 }

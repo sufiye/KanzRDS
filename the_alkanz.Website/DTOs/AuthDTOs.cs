@@ -144,3 +144,38 @@ public class RefreshTokenRequest
     /// <example>3fa85f64-5717-4562-b3fc-2c963f66afa6</example>
     public string RefreshToken { get; set; } = string.Empty;
 }
+
+public class UserResponseDto
+{
+    /// <summary>
+    /// User's first name.
+    /// </summary>
+    /// <example>John</example>
+    public string FirstName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// User's last name.
+    /// </summary>
+    /// <example>Doe</example>
+    public string LastName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// User's address (optional).
+    /// </summary>
+    /// <example>123 Main St, Baku, Azerbaijan</example>
+    public string? Address { get; set; }
+
+    /// <summary>
+    /// User's phone number (optional).
+    /// </summary>
+    /// <example>+994501234567</example>
+    public string? PhoneNumber { get; set; }
+
+    /// <summary>
+    /// User's email address.
+    /// </summary>
+    /// <example>john.doe@example.com</example>
+    public string Email { get; set; } = string.Empty;
+
+}
+

@@ -9,6 +9,5 @@ public class AttechmentResponseDto
     public string ContentType { get; set; } = string.Empty;
     public long Size { get; set; }
 
-    public string UploadedUserId { get; set; } = string.Empty;
     public DateTimeOffset UploadedAt { get; set; }
 }

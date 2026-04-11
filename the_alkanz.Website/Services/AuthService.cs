@@ -39,6 +39,16 @@ public class AuthService : IAuthService
         return true;
     }
 
+    public async Task<UserResponseDto> GetUserInfoAsync(Guid id)
+    {
+        var user =await _userManager.Users.FirstOrDefaultAsync(u=> u.Id == id.ToString());
+
+        if (user is null)
+            return null!;
+
+        return _mapper.Map<UserResponseDto>(user);
+    }
+
     public async Task<AuthResponseDto> LoginAsync(LoginRequest loginRequest)
     {
         var user = await _userManager.FindByEmailAsync(loginRequest.Email);
@@ -102,6 +112,7 @@ public class AuthService : IAuthService
             throw new InvalidOperationException("This user alredy exists");
         }
 
+
         var user = new ApplicationUser
         {
             UserName = registerRequest.Email,
@@ -114,13 +125,17 @@ public class AuthService : IAuthService
             UpdatedAt = null
         };
 
+       
         var result = await _userManager.CreateAsync(user, registerRequest.Password);
+
+        await _userManager.AddToRoleAsync(user, "User");
 
         if (!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
             throw new InvalidOperationException($"User creation failed : {errors}");
-        }
+        } 
+        
 
         return await CreatTokenAsync(user);
 

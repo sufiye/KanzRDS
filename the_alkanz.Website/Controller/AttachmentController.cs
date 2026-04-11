@@ -37,37 +37,37 @@ public class AttachmentController : ControllerBase
     /// <response code="200">Returns the uploaded attachment info.</response>
     /// <response code="400">If no file is provided.</response>
     /// <response code="404">If the product or attachment could not be found.</response>
-    [HttpPost("~/api/products/{productId:guid}/attachments")]
-    public async Task<ActionResult<AttechmentResponseDto>> Upload(
-        Guid productId,
-        IFormFile file,
-        CancellationToken cancellationToken
-    )
-    {
-        var product = await _productService.GetByIdAsync(productId);
-        if (product is null)
-            return NotFound();
+  
+        [HttpPost("/api/products/{productId:guid}/attachments")]
+        public async Task<ActionResult<AttechmentResponseDto>> Upload(
+            Guid productId,
+           IFormFile file,
+            CancellationToken cancellationToken)
+        {
+            var product = await _productService.GetByIdAsync(productId);
+            if (product is null)
+                return NotFound();
 
-        if (file is null || file.Length == 0)
-            return BadRequest("File is required");
+            if (file is null || file.Length == 0)
+                return BadRequest("File required");
 
-        AttechmentResponseDto? attachment;
-        await using var stream = file.OpenReadStream();
-        attachment = await _attachmentService.UploadAsync(
-            productId,
-            stream,
-            file.FileName,
-            file.ContentType,
-            file.Length,
-            UserId!,
-            cancellationToken
-        );
+            await using var stream = file.OpenReadStream();
 
-        if (attachment is null)
-            return NotFound();
+            var result = await _attachmentService.UploadAsync(
+                productId,
+                stream,
+                file.FileName,
+                file.ContentType,
+                file.Length,
+                cancellationToken
+            );
 
-        return Ok(attachment);
-    }
+            if (result is null)
+                return NotFound();
+
+            return Ok(result);
+        }
+    
 
     /// <summary>
     /// Downloads an attachment by its ID.

@@ -4,7 +4,7 @@ namespace the_alkanz.Website.Repositories;
 public interface IOrderRepository
 {
     public Task<OrderResponseDto> CreatOrderAsync(Guid userId);
-    public Task<OrderResponseDto> GetOrderAsync(Guid userId);
+    public Task<IEnumerable<OrderResponseDto>> GetOrderUserAllAsync(Guid userId);
     public Task<IEnumerable<OrderResponseDto>> GetAllOrderAsync();
-    public Task<OrderResponseDto> OrderStatusChangeAsync(Guid userId, Guid orderId, OrderStatusChange orderStatus);
+    public Task<OrderResponseDto> OrderStatusChangeAsync(Guid orderId, OrderStatusChange orderStatus);
 }
