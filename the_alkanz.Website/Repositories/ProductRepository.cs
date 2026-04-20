@@ -110,7 +110,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<IEnumerable<Product>> GetProductsByCategoryId(Guid categoryId)
     {
-        var products = await _context.Products.Where(p=>p.CategoryId == categoryId).ToListAsync();
+        var products = await _context.Products.Include(p=>p.Attachments).Where(p=>p.CategoryId == categoryId).ToListAsync();
 
         return products!;
     }
