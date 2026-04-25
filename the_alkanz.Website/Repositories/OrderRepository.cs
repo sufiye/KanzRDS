@@ -39,6 +39,12 @@ public class OrderRepository : IOrderRepository
 
         foreach (var item in basketItems)
         {
+            if(item.Product.StockCount < item.Quantity)
+            {
+                return null!;
+            }
+
+            item.Product.StockCount -= item.Quantity;
             orderItems.Add(new OrderItem
             {
                 Id = Guid.NewGuid(),
