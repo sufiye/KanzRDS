@@ -15,6 +15,10 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<Category> AddAsync(Category category)
     {
+        var category1 = await _context.Categories.FirstOrDefaultAsync(c=> c.Name == category.Name);
+
+        if (category1 != null) return null!;
+
         _context.Categories.Add(category);
 
         await _context.SaveChangesAsync();
