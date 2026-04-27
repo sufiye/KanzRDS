@@ -12,7 +12,6 @@ using the_alkanz.Website.Mappings;
 using the_alkanz.Website.Models;
 using the_alkanz.Website.Repositories;
 using the_alkanz.Website.Services;
-using the_alkanz.Website.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -86,7 +85,7 @@ builder.Services.AddSwaggerGen(
 
 var connectionString = builder.
                        Configuration
-                       .GetConnectionString("KanzConnectionString");
+                       .GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<KanzDbContext>(
     option => option.UseSqlServer(connectionString)
@@ -135,11 +134,12 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAttachmentService, AttachmentService>();
 
+builder.Services.AddScoped<IAttachmentRepository, AttachmentRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IFileStorage, LocalDiskStorage>();
+
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();

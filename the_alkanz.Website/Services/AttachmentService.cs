@@ -1,150 +1,117 @@
-﻿using Microsoft.EntityFrameworkCore;
-using the_alkanz.Website.Data;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
 using the_alkanz.Website.DTOs;
-using the_alkanz.Website.Models;
-using the_alkanz.Website.Storage;
+using the_alkanz.Website.Repositories;
 
 namespace the_alkanz.Website.Services;
 
 public class AttachmentService : IAttachmentService
 {
-    public const long MaxFileSizeBytes = 5 * 1024 * 1024;
+    private readonly IAmazonS3 _s3Client;
+    private readonly string _bucketName;
+    private readonly string _region;
+    private readonly IAttachmentRepository _repository;
 
-    public static readonly string[] AllowedExtensions =
+    public AttachmentService(
+        IConfiguration configuration,
+        IAttachmentRepository repository)
     {
-        ".jpg", ".jpeg", ".png", ".pdf", ".txt", ".zip"
-    };
+        _repository = repository;
 
-    public static readonly string[] AllowedContentTypes =
-    {
-        "image/jpeg",
-        "image/png",
-        "application/pdf",
-        "text/plain",
-        "application/zip",
-        "application/x-zip-compressed"
-    };
+        var awsSection = configuration.GetSection("AWS");
+        var accessKey = awsSection["AccessKey"];
+        var secretKey = awsSection["SecretKey"];
+        _bucketName = awsSection["BucketName"]!;
+        _region = awsSection["Region"]!;
 
-    private readonly KanzDbContext _context;
-    private readonly IFileStorage _storage;
+        var credentials = new Amazon.Runtime.BasicAWSCredentials(
+            accessKey,
+            secretKey
+        );
 
-    public AttachmentService(KanzDbContext context, IFileStorage storage)
-    {
-        _context = context;
-        _storage = storage;
+        var config = new AmazonS3Config
+        {
+            RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(_region)
+        };
+
+        _s3Client = new AmazonS3Client(credentials, config);
     }
 
-    public async Task<AttechmentResponseDto?> UploadAsync(
-        Guid productId,
-        Stream fileStream,
-        string originalFileName,
-        string contentType,
-        long length,
-        CancellationToken cancellationToken = default)
+    // ✅ Upload
+    public async Task<AttechmentResponseDto> UploadAsync(Guid productId, IFormFile? file)
     {
-        if (length > MaxFileSizeBytes)
-            throw new ArgumentException("File too large (max 5MB)");
+        if (file == null || file.Length == 0)
+            throw new Exception("File is empty");
 
-        var ext = Path.GetExtension(originalFileName).ToLowerInvariant();
+        var fileExtension = Path.GetExtension(file.FileName);
+        var key = $"products/{Guid.NewGuid()}{fileExtension}";
 
-        if (string.IsNullOrEmpty(ext) || !AllowedExtensions.Contains(ext))
-            throw new ArgumentException("Invalid file extension");
+        using var stream = file.OpenReadStream();
 
-        if (!AllowedContentTypes.Contains(contentType, StringComparer.OrdinalIgnoreCase))
-            throw new ArgumentException("Invalid content type");
+        var request = new PutObjectRequest
+        {
+            BucketName = _bucketName,
+            Key = key,
+            InputStream = stream,
+            ContentType = file.ContentType
+        };
 
-        var product = await _context.Products.FindAsync([productId], cancellationToken);
+        await _s3Client.PutObjectAsync(request);
 
-        if (product is null)
-            return null;
-
-        var folderKey = $"products/{productId}";
-
-        var info = await _storage.UploadAsync(
-            fileStream,
-            originalFileName,
-            contentType,
-            folderKey,
-            cancellationToken
-        );
+        var fileUrl = $"https://{_bucketName}.s3.{_region}.amazonaws.com/{key}";
 
         var attachment = new ProductAttachment
         {
+            Id = Guid.NewGuid(),
             ProductId = productId,
-            OriginalFileName = originalFileName,
-            StoredFileName = info.StoredFileName,
-            ContentType = contentType,
-            Size = info.Size,
+            imgUrl = fileUrl,
             UploadedAt = DateTimeOffset.UtcNow
         };
 
-        _context.ProductAttachments.Add(attachment);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _repository.AddAsync(attachment);
 
         return new AttechmentResponseDto
         {
             Id = attachment.Id,
             ProductId = attachment.ProductId,
-            OriginalFileName = attachment.OriginalFileName,
-            ContentType = attachment.ContentType,
-            Size = attachment.Size,
+            Url = attachment.imgUrl,
             UploadedAt = attachment.UploadedAt
         };
     }
 
-    public async Task<(Stream stream, string fileName, string contentType)?> GetDownloadAsync(
-        Guid attachmentId,
-        CancellationToken cancellationToken = default)
+    // ✅ Get by product id
+    public async Task<List<AttechmentResponseDto>> GetByProductIdAsync(Guid productId)
     {
-        var att = await _context.ProductAttachments
-            .FirstOrDefaultAsync(a => a.Id == attachmentId, cancellationToken);
+        var attachments = await _repository.GetByProductIdAsync(productId);
 
-        if (att is null)
-            return null;
-
-        var key = $"products/{att.ProductId}/{att.StoredFileName}";
-
-        var stream = await _storage.OpenAsync(key, cancellationToken);
-
-        return (stream, att.OriginalFileName, att.ContentType);
-    }
-
-    public async Task<TaskAttachmentInfo?> GetAttachmentInfoAsync(
-        Guid attachmentId,
-        CancellationToken cancellationToken = default)
-    {
-        var att = await _context.ProductAttachments
-            .FirstOrDefaultAsync(a => a.Id == attachmentId, cancellationToken);
-
-        if (att is null)
-            return null;
-
-        return new TaskAttachmentInfo
+        return attachments.Select(x => new AttechmentResponseDto
         {
-            Id = att.Id,
-            productId = att.ProductId,
-            StoredFileName = att.StoredFileName,
-            StorageKey = $"products/{att.ProductId}/{att.StoredFileName}"
-        };
+            Id = x.Id,
+            ProductId = x.ProductId,
+            Url = x.imgUrl,
+            UploadedAt = x.UploadedAt
+        }).ToList();
     }
 
-    public async Task<bool> DeleteAsync(
-        Guid attachmentId,
-        CancellationToken cancellationToken = default)
+    // ✅ Delete
+    public async Task DeleteAsync(Guid id)
     {
-        var att = await _context.ProductAttachments
-            .FirstOrDefaultAsync(a => a.Id == attachmentId, cancellationToken);
+        var attachment = await _repository.GetByIdAsync(id);
 
-        if (att is null)
-            return false;
+        if (attachment == null)
+            throw new Exception("Attachment not found");
 
-        var key = $"products/{att.ProductId}/{att.StoredFileName}";
+        var url = new Uri(attachment.imgUrl!);
+        var key = url.AbsolutePath.TrimStart('/');
 
-        _context.ProductAttachments.Remove(att);
+        var request = new DeleteObjectRequest
+        {
+            BucketName = _bucketName,
+            Key = key
+        };
 
-        await _context.SaveChangesAsync(cancellationToken);
-        await _storage.DeleteAsync(key, cancellationToken);
+        await _s3Client.DeleteObjectAsync(request);
 
-        return true;
+        await _repository.DeleteAsync(attachment);
     }
 }

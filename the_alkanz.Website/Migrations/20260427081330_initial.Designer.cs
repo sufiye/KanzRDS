@@ -12,8 +12,8 @@ using the_alkanz.Website.Data;
 namespace the_alkanz.Website.Migrations
 {
     [DbContext(typeof(KanzDbContext))]
-    [Migration("20260410210223_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260427081330_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -164,26 +164,14 @@ namespace the_alkanz.Website.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OriginalFileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<long>("Size")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("StoredFileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTimeOffset>("UploadedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("imgUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -462,13 +450,11 @@ namespace the_alkanz.Website.Migrations
 
             modelBuilder.Entity("ProductAttachment", b =>
                 {
-                    b.HasOne("the_alkanz.Website.Models.Product", "Product")
+                    b.HasOne("the_alkanz.Website.Models.Product", null)
                         .WithMany("Attachments")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("the_alkanz.Website.Models.BasketItem", b =>
