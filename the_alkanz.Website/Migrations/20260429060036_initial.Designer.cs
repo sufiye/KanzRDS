@@ -12,7 +12,7 @@ using the_alkanz.Website.Data;
 namespace the_alkanz.Website.Migrations
 {
     [DbContext(typeof(KanzDbContext))]
-    [Migration("20260427081330_initial")]
+    [Migration("20260429060036_initial")]
     partial class initial
     {
         /// <inheritdoc />

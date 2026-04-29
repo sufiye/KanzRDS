@@ -18,7 +18,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddOpenApi();
 
 builder.Services.AddCors(options =>
 
@@ -92,8 +91,6 @@ builder.Services.AddDbContext<KanzDbContext>(
     );
 
 
-
-
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                             .AddEntityFrameworkStores<KanzDbContext>();
 
@@ -127,7 +124,6 @@ builder.Services.AddAuthentication(
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IBasketService, BasketService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();

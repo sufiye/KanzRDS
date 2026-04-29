@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using the_alkanz.Website.DTOs;
 using the_alkanz.Website.Services;
 
-[ApiController]
-[Route("api")]
+namespace the_alkanz.Website.Controller;
+
+[Route("api/[controller]")]
+[ApiController] 
 public class AttachmentController : ControllerBase
 {
     private readonly IAttachmentService _service;
@@ -12,20 +15,20 @@ public class AttachmentController : ControllerBase
         _service = service;
     }
 
-    [HttpPost("products/{productId:guid}/attachments")]
+    [HttpPost("{productId:guid}")]
     public async Task<IActionResult> Upload(
         Guid productId,
-        [FromForm] IFormFile file)
+        [FromForm] UploadAttachmentRequest request)
     {
-        if (file == null || file.Length == 0)
+        if (request.File == null || request.File.Length == 0)
             return BadRequest("File is empty");
 
-        var result = await _service.UploadAsync(productId, file);
+        var result = await _service.UploadAsync(productId, request.File);
         return Ok(result);
     }
 
 
-    [HttpGet("products/{productId:guid}/attachments")]
+    [HttpGet("{productId:guid}")]
     public async Task<IActionResult> Get(Guid productId)
     {
         var result = await _service.GetByProductIdAsync(productId);
@@ -33,7 +36,7 @@ public class AttachmentController : ControllerBase
     }
 
 
-    [HttpDelete("attachments/{id:guid}")]
+    [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
         try

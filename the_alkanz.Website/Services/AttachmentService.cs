@@ -1,5 +1,6 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
+using AutoMapper;
 using the_alkanz.Website.DTOs;
 using the_alkanz.Website.Repositories;
 
@@ -11,17 +12,18 @@ public class AttachmentService : IAttachmentService
     private readonly string _bucketName;
     private readonly string _region;
     private readonly IAttachmentRepository _repository;
-
+    private readonly IMapper _mapper;
     public AttachmentService(
         IConfiguration configuration,
-        IAttachmentRepository repository)
+        IAttachmentRepository repository,
+        IMapper mapper)
     {
         _repository = repository;
 
         var awsSection = configuration.GetSection("AWS");
         var accessKey = awsSection["AccessKey"];
         var secretKey = awsSection["SecretKey"];
-        _bucketName = awsSection["BucketName"]!;
+        _bucketName = awsSection["S3BucketName"]!;
         _region = awsSection["Region"]!;
 
         var credentials = new Amazon.Runtime.BasicAWSCredentials(
@@ -35,9 +37,10 @@ public class AttachmentService : IAttachmentService
         };
 
         _s3Client = new AmazonS3Client(credentials, config);
+        _mapper = mapper;
     }
 
-    // ✅ Upload
+
     public async Task<AttechmentResponseDto> UploadAsync(Guid productId, IFormFile? file)
     {
         if (file == null || file.Length == 0)
@@ -74,26 +77,18 @@ public class AttachmentService : IAttachmentService
         {
             Id = attachment.Id,
             ProductId = attachment.ProductId,
-            Url = attachment.imgUrl,
+            imgUrl = attachment.imgUrl,
             UploadedAt = attachment.UploadedAt
         };
     }
 
-    // ✅ Get by product id
-    public async Task<List<AttechmentResponseDto>> GetByProductIdAsync(Guid productId)
+    public async Task<IEnumerable<AttechmentResponseDto>> GetByProductIdAsync(Guid productId)
     {
         var attachments = await _repository.GetByProductIdAsync(productId);
 
-        return attachments.Select(x => new AttechmentResponseDto
-        {
-            Id = x.Id,
-            ProductId = x.ProductId,
-            Url = x.imgUrl,
-            UploadedAt = x.UploadedAt
-        }).ToList();
+        return _mapper.Map<IEnumerable<AttechmentResponseDto>>(attachments);
     }
 
-    // ✅ Delete
     public async Task DeleteAsync(Guid id)
     {
         var attachment = await _repository.GetByIdAsync(id);

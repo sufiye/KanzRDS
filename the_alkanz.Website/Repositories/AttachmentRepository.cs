@@ -1,14 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using the_alkanz.Website.Data;
+using the_alkanz.Website.DTOs;
 using the_alkanz.Website.Repositories;
 
 public class AttachmentRepository : IAttachmentRepository
 {
     private readonly KanzDbContext _context;
+    private readonly IMapper _mapper;
 
-    public AttachmentRepository(KanzDbContext context)
+    public AttachmentRepository(KanzDbContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     public async Task AddAsync(ProductAttachment attachment)
@@ -23,7 +27,7 @@ public class AttachmentRepository : IAttachmentRepository
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<List<ProductAttachment>> GetByProductIdAsync(Guid productId)
+    public async Task<IEnumerable<ProductAttachment>> GetByProductIdAsync(Guid productId)
     {
         return await _context.ProductAttachments
             .Where(x => x.ProductId == productId)
