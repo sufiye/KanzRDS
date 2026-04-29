@@ -10,7 +10,7 @@ import api from "../utils/axios";
 const Login = () => {
   const navigate = useNavigate();
 
-  const { setAccessToken, setRefreshToken, setRoles } = useTokens(); // 🔥 əlavə olundu
+  const { setAccessToken, setRefreshToken, setRoles } = useTokens();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -28,26 +28,41 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
+      if (!formData.email || !formData.password) {
+        toast.error("Fill all fields!");
+        return;
+      }
+
       const res = await api.post("/Auth/login", formData);
 
-      const data = res.data;
+      const data = res?.data;
 
-      setAccessToken(data.accessToken);
-      setRefreshToken(data.refreshToken);
-
-      if (data.roles) {
-        const rolesArray = Array.isArray(data.roles)
-          ? data.roles
-          : [data.roles];
-
-        setRoles(rolesArray);
+      if (!data) {
+        toast.error("Invalid response from server");
+        return;
       }
+
+      setAccessToken(data?.accessToken || "");
+      setRefreshToken(data?.refreshToken || "");
+
+      const rolesArray =
+        Array.isArray(data?.roles)
+          ? data.roles
+          : data?.roles
+          ? [data.roles]
+          : [];
+
+      setRoles(rolesArray);
 
       toast.success("Login successful");
       navigate("/");
 
     } catch (error) {
-      toast.error("Email or password incorrect!");
+      console.error("LOGIN ERROR:", error?.response?.data || error);
+      toast.error(
+        error?.response?.data?.message ||
+        "Email or password incorrect!"
+      );
     }
   };
 

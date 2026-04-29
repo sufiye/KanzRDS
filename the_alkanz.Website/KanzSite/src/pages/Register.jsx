@@ -30,8 +30,10 @@ const Register = () => {
     try {
       const res = await api.post("/Auth/register", formData)
 
-      setAccessToken(res.data.accessToken)
-      setRefreshToken(res.data.refreshToken)
+      const data = res?.data
+
+      setAccessToken(data?.accessToken || "")
+      setRefreshToken(data?.refreshToken || "")
 
       toast.success("Account created successfully 🎉")
       navigate("/")

@@ -7,8 +7,6 @@ import api from "../utils/axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:5064/api";
-
 const BasketItems = () => {
   const { isDarkmodeEnabled } = useDarkmode();
   const { accessToken } = useTokens();
@@ -17,58 +15,72 @@ const BasketItems = () => {
   const [basketItems, setBasketItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
-const fetchImage = async (productId) => {
- try {
+  // ✅ SAFE NORMALIZER
+  const normalizeArray = (data) => {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.items)) return data.items;
+    if (Array.isArray(data?.data)) return data.data;
+    return [];
+  };
 
-    const res = await api.get(`/Attachment/${productId}`);
+  // ✅ FIXED IMAGE FETCH (return always)
+  const fetchImage = async (productId) => {
+    try {
+      const res = await api.get(`/Attachment/${productId}`);
 
-    const data = res.data;
+      const data = normalizeArray(res.data);
 
-    if (Array.isArray(data) && data.length > 0) {
-      const image = data[0].imgUrl;
-return image
+      if (data.length > 0) {
+        return data[0].imgUrl;
+      }
+
+      return "/no-image.png";
+    } catch (error) {
+      console.error("IMAGE ERROR:", error);
+      return "/no-image.png";
     }
-  } catch (error) {
-    console.error("IMAGE ERROR:", error);
-    setImage("/no-image.png");
-  }
-};
-const getBasketItems = async () => {
-  if (!accessToken) return;
+  };
 
-  try {
-    const { data } = await api.get("/BasketItem", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+  const getBasketItems = async () => {
+    if (!accessToken) return;
 
-    const itemsWithImages = await Promise.all(
-      (data || []).map(async (item) => {
-        let imageUrl = "/no-image.png";
+    try {
+      const res = await api.get("/BasketItem", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
-        const productId = item?.product?.id;
+      const data = normalizeArray(res.data);
 
-        if (productId) {
-          try {
-            imageUrl = await fetchImage(productId);
-          } catch (err) {
-            console.error("IMAGE FETCH ERROR:", err);
-            imageUrl = "/no-image.png";
+      const itemsWithImages = await Promise.all(
+        data.map(async (item) => {
+          let imageUrl = "/no-image.png";
+
+          const productId = item?.product?.id;
+
+          if (productId) {
+            try {
+              imageUrl = await fetchImage(productId);
+            } catch (err) {
+              console.error("IMAGE FETCH ERROR:", err);
+              imageUrl = "/no-image.png";
+            }
           }
-        }
 
-        return {
-          ...item,
-          imageUrl,
-        };
-      })
-    );
+          return {
+            ...item,
+            imageUrl,
+          };
+        })
+      );
 
-    setBasketItems(itemsWithImages);
-  } catch (error) {
-    console.error("BASKET ERROR:", error);
-    toast.error("Failed to load basket");
-  }
-};  
+      setBasketItems(itemsWithImages);
+    } catch (error) {
+      console.error("BASKET ERROR:", error);
+      toast.error("Failed to load basket");
+      setBasketItems([]);
+    }
+  };
+
   const removeFromBasket = async (id) => {
     if (!accessToken) return;
 
@@ -77,7 +89,7 @@ const getBasketItems = async () => {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      setBasketItems(prev => prev.filter(item => item.id !== id));
+      setBasketItems((prev) => prev.filter((item) => item.id !== id));
       toast.success("Item removed");
     } catch {
       toast.error("Failed to remove");
@@ -98,8 +110,8 @@ const getBasketItems = async () => {
     try {
       await api.post("/Order", {}, {
         headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
 
       toast.success("Order placed successfully ✅");
@@ -107,7 +119,7 @@ const getBasketItems = async () => {
       setBasketItems([]);
 
       setTimeout(() => {
-        navigate("/orders"); 
+        navigate("/orders");
       }, 800);
 
     } catch (error) {
@@ -145,61 +157,60 @@ const getBasketItems = async () => {
 
             <div className="lg:col-span-2 space-y-6">
 
-              {basketItems.map((item) => (
-                <div
-                  key={item.id}
-                  className={`flex gap-6 p-5 rounded-xl border transition
+              {Array.isArray(basketItems) &&
+                basketItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`flex gap-6 p-5 rounded-xl border transition
                   ${isDarkmodeEnabled
-                      ? "border-[#3a342c] bg-[#26221d]"
-                      : "border-[#e5e0d8] bg-white"
-                    }`}
-                >
+                        ? "border-[#3a342c] bg-[#26221d]"
+                        : "border-[#e5e0d8] bg-white"
+                      }`}
+                  >
 
-                  <img
-                    src={item.imageUrl}
-                    className="w-28 h-28 object-cover rounded-lg"
-                  />
+                    <img
+                      src={item.imageUrl}
+                      className="w-28 h-28 object-cover rounded-lg"
+                    />
 
-                  <div className="flex flex-col justify-between flex-1">
+                    <div className="flex flex-col justify-between flex-1">
 
-                    <div>
-                      <h2 className="text-base font-semibold mb-1">
-                        {item.product?.name}
-                      </h2>
-                      <p className="text-xs opacity-70 line-clamp-2">
-                        {item.product?.description}
-                      </p>
-                    </div>
-
-                    <div className="flex justify-between items-center mt-4">
-
-                      <div className="text-sm">
-                        {item.product?.price?.toFixed(2)} AZN × {item.quantity}
+                      <div>
+                        <h2 className="text-base font-semibold mb-1">
+                          {item.product?.name}
+                        </h2>
+                        <p className="text-xs opacity-70 line-clamp-2">
+                          {item.product?.description}
+                        </p>
                       </div>
 
-                      <button
-                        onClick={() => removeFromBasket(item.id)}
-                        className="text-xs border px-4 py-2 hover:bg-black hover:text-white transition"
-                      >
-                        REMOVE
-                      </button>
+                      <div className="flex justify-between items-center mt-4">
+
+                        <div className="text-sm">
+                          {item.product?.price?.toFixed(2)} AZN × {item.quantity}
+                        </div>
+
+                        <button
+                          onClick={() => removeFromBasket(item.id)}
+                          className="text-xs border px-4 py-2 hover:bg-black hover:text-white transition"
+                        >
+                          REMOVE
+                        </button>
+
+                      </div>
 
                     </div>
 
                   </div>
-
-                </div>
-              ))}
+                ))}
 
             </div>
 
-            <div
-              className={`h-fit p-6 rounded-xl border
+            <div className={`h-fit p-6 rounded-xl border
               ${isDarkmodeEnabled
-                  ? "border-[#3a342c] bg-[#26221d]"
-                  : "border-[#e5e0d8] bg-white"
-                }`}
-            >
+                ? "border-[#3a342c] bg-[#26221d]"
+                : "border-[#e5e0d8] bg-white"
+              }`}>
 
               <h2 className="text-lg mb-6 tracking-wide">
                 ORDER SUMMARY
@@ -214,10 +225,10 @@ const getBasketItems = async () => {
                 onClick={makeOrder}
                 disabled={loading}
                 className={`w-full border py-3 text-sm tracking-wide transition
-                ${loading 
-                  ? "opacity-50 cursor-not-allowed" 
-                  : "hover:bg-black hover:text-white"
-                }`}
+                ${loading
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-black hover:text-white"
+                  }`}
               >
                 {loading ? "Processing..." : "PLACE ORDER"}
               </button>

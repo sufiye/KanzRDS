@@ -4,7 +4,12 @@ import { useTokens } from "../stores/tokenStore"
 import { useEffect, useState } from "react"
 import api from "../utils/axios"
 
-const Navbar = ({ searchterm, setSearchterm, selectedCategory, setSelectedCategory }) => {
+const Navbar = ({
+  searchterm = "",
+  setSearchterm = () => {},
+  selectedCategory = "",
+  setSelectedCategory = () => {}
+}) => {
   const { toggleDarkmode, isDarkmodeEnabled } = useDarkmode()
   const { accessToken, clearTokens, roles } = useTokens()
   const navigate = useNavigate()
@@ -14,14 +19,15 @@ const Navbar = ({ searchterm, setSearchterm, selectedCategory, setSelectedCatego
   const [menuOpen, setMenuOpen] = useState(false)
 
   const isHomePage = location.pathname === "/"
-  const isAdmin = roles?.includes("Admin") 
+  const isAdmin = roles?.includes("Admin") || false
 
   const getCategories = async () => {
     try {
       const res = await api.get("/Category")
-      setCategories(res.data)
+      setCategories(Array.isArray(res?.data) ? res.data : [])
     } catch (error) {
       console.error(error)
+      setCategories([])
     }
   }
 
@@ -49,8 +55,10 @@ const Navbar = ({ searchterm, setSearchterm, selectedCategory, setSelectedCatego
 
       <div className="flex justify-between items-center">
 
-        <h1 className="text-lg sm:text-xl tracking-[3px] font-semibold cursor-pointer"
-          onClick={() => navigate("/")}>
+        <h1
+          className="text-lg sm:text-xl tracking-[3px] font-semibold cursor-pointer"
+          onClick={() => navigate("/")}
+        >
           Kanz
         </h1>
 
@@ -72,7 +80,7 @@ const Navbar = ({ searchterm, setSearchterm, selectedCategory, setSelectedCatego
           {isHomePage && (
             <>
               <select
-                value={selectedCategory}
+                value={selectedCategory || ""}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className={`px-3 py-2 text-xs rounded-lg border
                 ${isDarkmodeEnabled
@@ -81,17 +89,19 @@ const Navbar = ({ searchterm, setSearchterm, selectedCategory, setSelectedCatego
                 }`}
               >
                 <option value="">All</option>
-                {categories.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
+                {Array.isArray(categories) &&
+                  categories.map(c => (
+                    <option key={c?.id} value={c?.id}>
+                      {c?.name}
+                    </option>
+                  ))
+                }
               </select>
 
               <input
                 placeholder="Search"
                 type="search"
-                value={searchterm}
+                value={searchterm || ""}
                 onChange={(e) => setSearchterm(e.target.value)}
                 className={`px-4 py-2 text-xs rounded-lg border
                 ${isDarkmodeEnabled
@@ -110,7 +120,6 @@ const Navbar = ({ searchterm, setSearchterm, selectedCategory, setSelectedCatego
             {isDarkmodeEnabled ? "☀️" : "🌙"}
           </button>
 
-          {/* Desktop Auth */}
           <div className="hidden md:block">
             {accessToken ? (
               <button
@@ -132,7 +141,6 @@ const Navbar = ({ searchterm, setSearchterm, selectedCategory, setSelectedCatego
             )}
           </div>
 
-          {/* Mobile Burger */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="md:hidden text-xl"
@@ -161,22 +169,24 @@ const Navbar = ({ searchterm, setSearchterm, selectedCategory, setSelectedCatego
           {isHomePage && (
             <>
               <select
-                value={selectedCategory}
+                value={selectedCategory || ""}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="px-3 py-2 text-xs rounded-lg border"
               >
                 <option value="">All</option>
-                {categories.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
+                {Array.isArray(categories) &&
+                  categories.map(c => (
+                    <option key={c?.id} value={c?.id}>
+                      {c?.name}
+                    </option>
+                  ))
+                }
               </select>
 
               <input
                 placeholder="Search"
                 type="search"
-                value={searchterm}
+                value={searchterm || ""}
                 onChange={(e) => setSearchterm(e.target.value)}
                 className="px-4 py-2 text-xs rounded-lg border"
               />

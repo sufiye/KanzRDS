@@ -6,8 +6,6 @@ import { useDarkmode } from "../stores/store"
 import { useNavigate } from "react-router-dom"
 import { useTokens } from "../stores/tokenStore"
 
-const API_URL = "http://localhost:5064/api"
-
 const Order = () => {
   const { isDarkmodeEnabled } = useDarkmode()
   const { roles } = useTokens()
@@ -15,35 +13,43 @@ const Order = () => {
 
   const [orders, setOrders] = useState([])
   const [products, setProducts] = useState({})
-  const [users, setUsers] = useState({}) 
+  const [users, setUsers] = useState({})
 
   const navigate = useNavigate()
 
+  const normalizeArray = (data) => {
+    if (Array.isArray(data)) return data
+    if (Array.isArray(data?.items)) return data.items
+    return []
+  }
+
+  // 🔥 PRODUCT SAFE
   const getProductById = async (id) => {
     try {
-      if (products[id]) return
+      if (!id || products[id]) return
 
-      const res = await fetch(`${API_URL}/Product/${id}`)
-      const data = await res.json()
+      const res = await api.get(`Product/${id}`)
+      const data = res?.data
 
       setProducts(prev => ({
         ...prev,
-        [id]: data
+        [id]: data || {}
       }))
     } catch (error) {
       console.error("PRODUCT ERROR:", error)
     }
   }
 
+  // 🔥 USER SAFE
   const getUserById = async (userId) => {
     try {
-      if (users[userId]) return
+      if (!userId || users[userId]) return
 
       const res = await api.post(`/Auth/${userId}/user`)
 
       setUsers(prev => ({
         ...prev,
-        [userId]: res.data
+        [userId]: res?.data || {}
       }))
 
     } catch (err) {
@@ -51,30 +57,43 @@ const Order = () => {
     }
   }
 
+  // 🔥 ORDERS SAFE
   const getOrders = async () => {
     try {
       const url = isAdmin ? "/Order/All" : "/Order"
 
       const res = await api.get(url)
-      const data = res.data
+      const data = normalizeArray(res?.data)
 
-      const orderList = Array.isArray(data) ? data : [data]
-      setOrders(orderList)
+      setOrders(data)
 
-      orderList.forEach(order => {
-
-        order.items?.forEach(item => {
-          getProductById(item.productId)
+      data.forEach(order => {
+        order?.items?.forEach(item => {
+          getProductById(item?.productId)
         })
 
-        if (order.userId) {
+        if (order?.userId) {
           getUserById(order.userId)
         }
-
       })
 
     } catch (error) {
       console.error("ORDER ERROR:", error)
+    }
+  }
+
+  // 🔥 STATUS UPDATE FIX (SƏNİ SINDIRAN BU İDİ)
+  const updateStatus = async (id, status) => {
+    try {
+      await api.put(`/Order/${id}`, { status })
+
+      setOrders(prev =>
+        prev.map(o =>
+          o.id === id ? { ...o, status } : o
+        )
+      )
+    } catch (error) {
+      console.error("STATUS ERROR:", error)
     }
   }
 
@@ -91,8 +110,8 @@ const Order = () => {
 
   return (
     <div className={`min-h-screen w-full ${
-      isDarkmodeEnabled 
-        ? "bg-[#1c1814] text-[#e6dccf]" 
+      isDarkmodeEnabled
+        ? "bg-[#1c1814] text-[#e6dccf]"
         : "bg-[#f4efe7] text-[#3a3835]"
     }`}>
 
@@ -111,50 +130,58 @@ const Order = () => {
 
             {orders.map((order) => {
 
-              const user = users[order.userId]
+              const user = users[order?.userId]
 
               return (
-                <div key={order.id}
+                <div key={order?.id}
                   className={`p-5 rounded-xl border shadow-sm
-                  ${isDarkmodeEnabled 
-                    ? "bg-[#26221d] border-[#3a342c]" 
+                  ${isDarkmodeEnabled
+                    ? "bg-[#26221d] border-[#3a342c]"
                     : "bg-white border-[#e5e0d8]"}`}>
 
                   {isAdmin && (
                     <div className="mb-3 text-sm space-y-1">
-                      <p><b>User:</b> {user?.firstName+ " " + user?.lastName || "Loading..."}</p>
+                      <p>
+                        <b>User:</b>{" "}
+                        {user?.firstName
+                          ? user.firstName + " " + user.lastName
+                          : "Loading..."}
+                      </p>
                       <p><b>Phone:</b> {user?.phoneNumber || "-"}</p>
                       <p><b>Address:</b> {user?.address || "-"}</p>
                     </div>
                   )}
+
                   <div className="flex justify-between mb-2">
                     <span className="text-xs opacity-70">
-                      {order.id}
+                      {order?.id}
                     </span>
 
                     <span className={`text-xs px-3 py-1 rounded-full
                       ${
-                        order.status === "Pending"
+                        order?.status === "Pending"
                           ? "bg-yellow-500 text-white"
-                          : order.status === "Shipped"
+                          : order?.status === "Shipped"
                           ? "bg-blue-500 text-white"
                           : "bg-green-500 text-white"
                       }`}>
-                      {order.status}
+                      {order?.status}
                     </span>
                   </div>
 
                   <p className="text-sm opacity-70">
-                    {new Date(order.orderDate).toLocaleString()}
+                    {order?.orderDate
+                      ? new Date(order.orderDate).toLocaleString()
+                      : ""}
                   </p>
 
                   <p className="font-semibold mt-1">
-                    Total: {order.totalPrice} AZN
+                    Total: {order?.totalPrice} AZN
                   </p>
 
                   <div className="mt-4 space-y-3">
-                    {order.items?.map((item, i) => {
-                      const product = products[item.productId]
+                    {order?.items?.map((item, i) => {
+                      const product = products[item?.productId]
 
                       return (
                         <div key={i}
@@ -164,7 +191,7 @@ const Order = () => {
                             <img
                               src={
                                 product?.attachments?.length > 0
-                                  ? `${API_URL}/Attachment/${product.id}`
+                                  ? `/Attachment/${product?.id}`
                                   : "/no-image.png"
                               }
                               className="w-12 h-12 object-cover rounded-lg"
@@ -175,12 +202,12 @@ const Order = () => {
                                 {product?.name || "Loading..."}
                               </p>
                               <p className="text-xs opacity-60">
-                                {item.price} AZN
+                                {item?.price} AZN
                               </p>
                             </div>
                           </div>
 
-                          <span>x{item.quantity}</span>
+                          <span>x{item?.quantity}</span>
                         </div>
                       )
                     })}
@@ -190,7 +217,7 @@ const Order = () => {
                     <div className="flex gap-3 mt-4 items-center">
 
                       <select
-                        value={order.status}
+                        value={order?.status}
                         onChange={(e) =>
                           updateStatus(order.id, e.target.value)
                         }

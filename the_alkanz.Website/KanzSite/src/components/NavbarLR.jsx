@@ -1,10 +1,8 @@
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { useDarkmode } from "../stores/store"
-import { useState } from "react"
-import { useTokens } from "../stores/tokenStore"
 
 const Navbar = () => {
-  const { toggleDarkmode, isDarkmodeEnabled } = useDarkmode()
+  const { toggleDarkmode, isDarkmodeEnabled } = useDarkmode() || {}
 
   return (
     <div
@@ -21,23 +19,22 @@ const Navbar = () => {
       </h1>
 
       <div className="flex items-center gap-10 tracking-wide">
-
-        <Link className="hover:opacity-60 transition" to="/">Home</Link>
-
+        <Link className="hover:opacity-60 transition" to="/">
+          Home
+        </Link>
       </div>
 
       <div className="flex items-center gap-5">
 
         <button
-          onClick={toggleDarkmode}
+          onClick={() => toggleDarkmode?.()}
           className="opacity-70 hover:opacity-100 transition"
         >
           {isDarkmodeEnabled ? "☀️" : "🌙"}
         </button>
 
-     
-
       </div>
+
     </div>
   )
 }

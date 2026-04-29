@@ -4,8 +4,6 @@ import { useNavigate } from "react-router-dom";
 import api from "../utils/axios";
 import { useTokens } from "../stores/tokenStore";
 
-const API_URL = "http://localhost:5064/api";
-
 const CartCard = ({ product }) => {
   const [image, setImage] = useState("/no-image.png");
   const [added, setAdded] = useState(false);
@@ -16,29 +14,31 @@ const CartCard = ({ product }) => {
 
   const isAdmin = roles?.includes("Admin");
 
-
   const isOutOfStock = !isAdmin && product?.stockCount === 0;
 
-const imageGet = async (productId) => {
-  try {
+  const imageGet = async (productId) => {
+    try {
+      if (!productId) {
+        setImage("/no-image.png");
+        return;
+      }
 
-    const res = await api.get(`/Attachment/${productId}`);
+      const res = await api.get(`/Attachment/${productId}`);
+      const data = res?.data;
 
-    const data = res.data;
-
-    if (Array.isArray(data) && data.length > 0) {
-      const iamge = data[0].imgUrl;
-
-      setImage(iamge);
-    } else {
+      if (Array.isArray(data) && data.length > 0) {
+        setImage(data[0]?.imgUrl || "/no-image.png");
+      } else {
+        setImage("/no-image.png");
+      }
+    } catch (error) {
+      console.error("IMAGE ERROR:", error);
       setImage("/no-image.png");
     }
-  } catch (error) {
-    console.error("IMAGE ERROR:", error);
-    setImage("/no-image.png");
-  }
-};
+  };
+
   const goToDetails = () => {
+    if (!product?.id) return;
 
     if (!isOutOfStock || isAdmin) {
       navigate(`/details/${product.id}`);
@@ -57,22 +57,22 @@ const imageGet = async (productId) => {
 
     try {
       await api.post("/BasketItem", {
-        productId: product.id,
+        productId: product?.id,
         quantity: 1,
       });
 
       setAdded(true);
       setTimeout(() => setAdded(false), 1500);
     } catch (error) {
-      console.error(error);
+      console.error("BASKET ERROR:", error);
     }
   };
 
   useEffect(() => {
-    if (product?.attachments?.length > 0) {
+    if (product?.id) {
       imageGet(product.id);
     }
-  }, [product]);
+  }, [product?.id]);
 
   return (
     <div
@@ -93,15 +93,15 @@ const imageGet = async (productId) => {
       <img
         className="w-full h-[200px] object-cover rounded-lg"
         src={image}
-        alt={product?.name}
+        alt={product?.name || "product"}
       />
 
       <h1 className="text-sm tracking-wide line-clamp-2">
-        {product?.name}
+        {product?.name || ""}
       </h1>
 
       <p className="text-sm opacity-70">
-        {product?.price?.toFixed(2)} AZN
+        {(product?.price ?? 0).toFixed(2)} AZN
       </p>
 
       {!isAdmin && (
@@ -118,21 +118,13 @@ const imageGet = async (productId) => {
           ${isOutOfStock ? "opacity-50 cursor-not-allowed" : ""}
           `}
         >
-          <span
-            className={`transition ${
-              added ? "opacity-0" : "opacity-100"
-            }`}
-          >
+          <span className={`transition ${added ? "opacity-0" : "opacity-100"}`}>
             {isOutOfStock ? "OUT OF STOCK" : "ADD TO BASKET"}
           </span>
 
           <span
             className={`absolute inset-0 flex items-center justify-center transition
-            ${
-              added
-                ? "opacity-100 scale-100"
-                : "opacity-0 scale-75"
-            }`}
+            ${added ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
           >
             ✓ ADDED
           </span>
